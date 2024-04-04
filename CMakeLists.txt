@@ -11,7 +11,8 @@ message(STATUS "ASH_ROOT_DIR = " ${ASH_ROOT_DIR})
 
 add_library(Ash
         src/app.cpp
-        src/app.h)
+        src/app.h
+        src/utils/fps_counter.h)
 target_include_directories(Ash PUBLIC "${ASH_ROOT_DIR}/src")
 
 # ------------------- Setup Dependencies -------------------
@@ -116,34 +117,6 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(slot_map)
 target_link_libraries(Ash PUBLIC slot_map)
 
-
-# FetchContent_Declare(
-#         vk-bootstrap
-#         GIT_REPOSITORY  https://github.com/charles-lunarg/vk-bootstrap.git
-#         GIT_TAG         v1.3.281
-#         GIT_PROGRESS    TRUE
-# )
-# FetchContent_MakeAvailable(vk-bootstrap)
-# target_link_libraries(Ash PUBLIC vk-bootstrap::vk-bootstrap)
-
-# FetchContent_Declare(
-#         VMA
-#         GIT_REPOSITORY  https://github.com/GPUOpen-LibrariesAndSDKs/VulkanMemoryAllocator.git
-#         GIT_TAG         19b940e864bd3a5afb3c79e3c6788869d01a19eb
-#         GIT_PROGRESS    TRUE
-# )
-# FetchContent_MakeAvailable(VMA)
-# target_link_libraries(Ash PUBLIC GPUOpen::VulkanMemoryAllocator)
-
-# FetchContent_Declare(
-#         imgui
-#         GIT_REPOSITORY  https://github.com/ocornut/imgui.git
-#         GIT_TAG         d3c3514a59bb31406c954c2b525f330e9d167845
-#         GIT_PROGRESS    TRUE
-# )
-# FetchContent_MakeAvailable(imgui)
-# TODO: target_link_libraries(Ash PUBLIC ???)
-
 # ------------------- Setup Samples -------------------
 
 add_executable(HelloWindow samples/hello_window.cpp)
@@ -155,6 +128,10 @@ add_executable(HelloTriangle samples/hello_triangle.cpp
 target_link_libraries(HelloTriangle PRIVATE SDL3::SDL3)
 target_link_libraries(HelloTriangle PRIVATE spdlog::spdlog_header_only)
 target_link_libraries(HelloTriangle PRIVATE LVKLibrary)
+
+add_executable(EmptyApp samples/empty_app.cpp)
+target_link_libraries(EmptyApp PRIVATE Ash)
+target_include_directories(EmptyApp PRIVATE "${ASH_ROOT_DIR}/src")
 
 add_executable(HelloCube samples/hello_cube.cpp)
 target_link_libraries(HelloCube PRIVATE Ash)
