@@ -12,7 +12,23 @@ message(STATUS "ASH_ROOT_DIR = " ${ASH_ROOT_DIR})
 add_library(Ash
         src/app.cpp
         src/app.h
-        src/utils/fps_counter.h)
+        src/utils/fps_counter.h
+        src/utils/slot_map_ptr.h
+        src/utils/stl_utils.h
+        src/world/world.cpp
+        src/world/world.h
+        src/world/game_object.cpp
+        src/world/game_object.h
+        src/world/components/transform_component.cpp
+        src/world/components/transform_component.h
+        src/world/components/camera_component.cpp
+        src/world/components/camera_component.h
+        src/world/components/camera_controller_component.cpp
+        src/world/components/camera_controller_component.h
+        src/world/component.h
+        src/utils/glm_utils.h
+        src/device/input_manager.cpp
+        src/device/input_manager.h)
 target_include_directories(Ash PUBLIC "${ASH_ROOT_DIR}/src")
 
 # ------------------- Setup Dependencies -------------------
@@ -109,13 +125,21 @@ FetchContent_MakeAvailable(spdlog)
 target_link_libraries(Ash PUBLIC spdlog::spdlog_header_only)
 
 FetchContent_Declare(
-        slot_map
-        GIT_REPOSITORY  https://github.com/SergeyMakeev/slot_map.git
-        GIT_TAG         b8ac8ebd89aa1cd18f20ce6e4ad1cac716f1933f
+        sg14
+        GIT_REPOSITORY  https://github.com/WG21-SG14/SG14.git
+        GIT_TAG         c92614381100bd23f3f0de7882aa455797255c03
         GIT_PROGRESS    TRUE
 )
-FetchContent_MakeAvailable(slot_map)
-target_link_libraries(Ash PUBLIC slot_map)
+FetchContent_MakeAvailable(sg14)
+target_link_libraries(Ash PUBLIC sg14)
+
+FetchContent_Declare(
+        Catch2
+        GIT_REPOSITORY  https://github.com/catchorg/Catch2.git
+        GIT_TAG         v3.5.3
+        GIT_PROGRESS    TRUE
+)
+FetchContent_MakeAvailable(Catch2)
 
 # ------------------- Setup Samples -------------------
 
@@ -136,3 +160,18 @@ target_include_directories(EmptyApp PRIVATE "${ASH_ROOT_DIR}/src")
 add_executable(HelloCube samples/hello_cube.cpp)
 target_link_libraries(HelloCube PRIVATE Ash)
 target_include_directories(HelloCube PRIVATE "${ASH_ROOT_DIR}/src")
+
+add_executable(HelloCamera samples/hello_camera.cpp)
+target_link_libraries(HelloCamera PRIVATE Ash)
+target_include_directories(HelloCamera PRIVATE "${ASH_ROOT_DIR}/src")
+
+# ------------------- Setup Tests -------------------
+
+add_executable(AshTests tests/world_test.cpp)
+target_include_directories(HelloCube PRIVATE "${ASH_ROOT_DIR}/src")
+target_link_libraries(AshTests PRIVATE Ash Catch2::Catch2WithMain)
+
+list(APPEND CMAKE_MODULE_PATH ${catch2_SOURCE_DIR}/extras)
+include(CTest)
+include(Catch)
+catch_discover_tests(AshTests)

@@ -6,6 +6,7 @@
 #include "vulkan/VulkanClasses.h"
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
+#include "device/input_manager.h"
 
 namespace
 {
@@ -149,6 +150,8 @@ int run_application(BaseApp& app, int argc, char* argv[])
     
     while (!app.is_done() && !close_requested)
     {
+        InputManager::get().tick();
+
         SDL_Event event;
         while (SDL_PollEvent(&event))
         {
@@ -187,6 +190,7 @@ int run_application(BaseApp& app, int argc, char* argv[])
                     {
                         ImGui::GetIO().MouseDown[ImGuiMouseButton_::ImGuiMouseButton_Middle] = true;
                     }
+                    InputManager::get().on_mouse_down(static_cast<MouseButton>(button));
                 }
                 break;
             }
@@ -206,11 +210,27 @@ int run_application(BaseApp& app, int argc, char* argv[])
                     {
                         ImGui::GetIO().MouseDown[ImGuiMouseButton_::ImGuiMouseButton_Middle] = false;
                     }
+                    InputManager::get().on_mouse_up(static_cast<MouseButton>(button));
                 }
                 break;
             }
             case SDL_EVENT_MOUSE_MOTION: {
                 ImGui::GetIO().MousePos = ImVec2(event.button.x, event.button.y);
+                InputManager::get().on_mouse_move({event.button.x, event.button.y});
+                break;
+            }
+            case SDL_EVENT_MOUSE_WHEEL: {
+                ImGui::GetIO().MouseWheelH = event.wheel.x;
+                ImGui::GetIO().MouseWheel = event.wheel.y;
+                InputManager::get().on_mouse_scroll({event.wheel.x, event.wheel.y});
+                break;
+            }
+            case SDL_EVENT_KEY_DOWN: {
+                InputManager::get().on_key_down(event.key.keysym.sym);
+                break;
+            }
+            case SDL_EVENT_KEY_UP: {
+                InputManager::get().on_key_up(event.key.keysym.sym);
                 break;
             }
             }
