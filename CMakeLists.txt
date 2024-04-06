@@ -9,6 +9,14 @@ set(CMAKE_POLICY_DEFAULT_CMP0077 NEW)
 set(ASH_ROOT_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 message(STATUS "ASH_ROOT_DIR = " ${ASH_ROOT_DIR})
 
+option(ASH_BUILD_SAMPLES "Enables builds of samples" ON)
+option(ASH_BUILD_TESTS "Enables builds of tests" ON)
+message(STATUS "ASH_BUILD_SAMPLES: " ${ASH_BUILD_SAMPLES})
+message(STATUS "ASH_BUILD_TESTS: " ${ASH_BUILD_TESTS})
+
+# -----------------------------------------------------------------------------
+# Ash Library
+# -----------------------------------------------------------------------------
 add_library(Ash
         src/app.cpp
         src/app.h
@@ -31,8 +39,24 @@ add_library(Ash
         src/device/input_manager.h)
 target_include_directories(Ash PUBLIC "${ASH_ROOT_DIR}/src")
 
-# ------------------- Setup Dependencies -------------------
+# -----------------------------------------------------------------------------
+# Samples
+# -----------------------------------------------------------------------------
+if(ASH_BUILD_SAMPLES)
+    add_subdirectory(samples)
+endif(ASH_BUILD_SAMPLES)
 
+# -----------------------------------------------------------------------------
+# Tests
+# -----------------------------------------------------------------------------
+if(ASH_BUILD_TESTS)
+    add_subdirectory(tests)
+endif(ASH_BUILD_TESTS)
+
+
+# -----------------------------------------------------------------------------
+# Setup Dependencies
+# -----------------------------------------------------------------------------
 # Locate Vulkan SDK
 message(STATUS "Attempting auto locate Vulkan using CMake......")
 cmake_path(SET VULKAN_PATH $ENV{VULKAN_SDK})
@@ -133,45 +157,13 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(sg14)
 target_link_libraries(Ash PUBLIC sg14)
 
+set(TF_BUILD_TESTS OFF)
+set(TF_BUILD_EXAMPLES OFF)
 FetchContent_Declare(
-        Catch2
-        GIT_REPOSITORY  https://github.com/catchorg/Catch2.git
-        GIT_TAG         v3.5.3
+        taskflow
+        GIT_REPOSITORY  https://github.com/taskflow/taskflow.git
+        GIT_TAG         1b6cf17bb37741103a67cb3698066b6b80def2e0
         GIT_PROGRESS    TRUE
 )
-FetchContent_MakeAvailable(Catch2)
-
-# ------------------- Setup Samples -------------------
-
-add_executable(HelloWindow samples/hello_window.cpp)
-target_link_libraries(HelloWindow PRIVATE SDL3::SDL3)
-target_link_libraries(HelloWindow PRIVATE spdlog::spdlog_header_only)
-
-add_executable(HelloTriangle samples/hello_triangle.cpp
-        samples/hello_cube.cpp)
-target_link_libraries(HelloTriangle PRIVATE SDL3::SDL3)
-target_link_libraries(HelloTriangle PRIVATE spdlog::spdlog_header_only)
-target_link_libraries(HelloTriangle PRIVATE LVKLibrary)
-
-add_executable(EmptyApp samples/empty_app.cpp)
-target_link_libraries(EmptyApp PRIVATE Ash)
-target_include_directories(EmptyApp PRIVATE "${ASH_ROOT_DIR}/src")
-
-add_executable(HelloCube samples/hello_cube.cpp)
-target_link_libraries(HelloCube PRIVATE Ash)
-target_include_directories(HelloCube PRIVATE "${ASH_ROOT_DIR}/src")
-
-add_executable(HelloCamera samples/hello_camera.cpp)
-target_link_libraries(HelloCamera PRIVATE Ash)
-target_include_directories(HelloCamera PRIVATE "${ASH_ROOT_DIR}/src")
-
-# ------------------- Setup Tests -------------------
-
-add_executable(AshTests tests/world_test.cpp)
-target_include_directories(HelloCube PRIVATE "${ASH_ROOT_DIR}/src")
-target_link_libraries(AshTests PRIVATE Ash Catch2::Catch2WithMain)
-
-list(APPEND CMAKE_MODULE_PATH ${catch2_SOURCE_DIR}/extras)
-include(CTest)
-include(Catch)
-catch_discover_tests(AshTests)
+FetchContent_MakeAvailable(taskflow)
+target_link_libraries(Ash PUBLIC Taskflow)
