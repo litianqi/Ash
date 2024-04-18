@@ -1,6 +1,6 @@
 #include "transform_component.h"
-#include "utils/stl_utils.h"
-#include "utils/glm_utils.h"
+#include "core/file.h"
+#include "core/math.h"
 
 namespace ash
 {

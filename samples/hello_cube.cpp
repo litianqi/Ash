@@ -4,7 +4,7 @@
 #include "glm/ext.hpp"
 #include "glm/glm.hpp"
 #include "SDL_timer.h"
-#include "utils/fps_counter.h"
+#include "core/fps_counter.h"
 
 using glm::mat4;
 using glm::vec2;
@@ -252,7 +252,7 @@ class CubeApp : public BaseApp
         depth_state = {.compareOp = lvk::CompareOp_Less, .isDepthWriteEnabled = true};
 
         texture0 = create_xor_pattern_texture(*context);
-        texture1 = load_texture(*context, get_content_dir() / fs::path("wood_polished_01_diff.png"));
+        texture1 = load_texture(*context, get_resources_dir() / fs::path("wood_polished_01_diff.png"));
 
         sampler = context->createSampler({.debugName = "Sampler: linear"}, nullptr);
 

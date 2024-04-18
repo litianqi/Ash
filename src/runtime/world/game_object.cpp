@@ -1,6 +1,6 @@
 #include "game_object.h"
 #include "components/transform_component.h"
-#include "utils/stl_utils.h"
+#include "core/file.h"
 
 namespace ash
 {
@@ -18,7 +18,11 @@ void GameObject::set_parent(GameObjectPtr new_parent)
     {
         if (parent)
         {
-            vector_erase_first(parent->children, self);
+            auto it = std::find(parent->children.begin(), parent->children.end(), self);
+            if (it != parent->children.end())
+            {
+                children.erase(it);
+            }
         }
         parent = new_parent;
         if (new_parent)
@@ -30,7 +34,7 @@ void GameObject::set_parent(GameObjectPtr new_parent)
 
 void GameObject::add_child(GameObjectPtr child)
 {
-    if (child && !vector_contains(children, child))
+    if (child && std::find(children.begin(), children.end(), child) != children.end())
     {
         children.push_back(child);
         child->parent = self;
@@ -39,9 +43,13 @@ void GameObject::add_child(GameObjectPtr child)
 
 void GameObject::remove_child(GameObjectPtr child)
 {
-    if (child && vector_contains(children, child))
+    if (child && std::find(children.begin(), children.end(), child) != children.end())
     {
-        vector_erase_first(children, child);
+        auto it = std::find(children.begin(), children.end(), child);
+        if (it != children.end())
+        {
+            children.erase(it);
+        }
         child->parent = {};
     }
 }

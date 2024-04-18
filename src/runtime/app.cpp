@@ -6,7 +6,7 @@
 #include "vulkan/VulkanClasses.h"
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
-#include "device/input_manager.h"
+#include "input/input_manager.h"
 
 namespace
 {
@@ -89,15 +89,15 @@ void BaseApp::startup()
     minilog::initialize(nullptr, {.logLevelPrintToConsole = minilog::Warning, .threadNames = false});
 
     fs::path dir = fs::current_path();
-    const char* content_dir_name = "content";
-    while (dir != fs::current_path().root_path() && !exists(dir / fs::path(content_dir_name)))
+    const char* resources_dir_name = "resources";
+    while (dir != fs::current_path().root_path() && !exists(dir / fs::path(resources_dir_name)))
     {
         dir = dir.parent_path();
     }
     root_dir = dir;
-    content_dir = dir / fs::path(content_dir_name);
+    resources_dir = dir / fs::path(resources_dir_name);
     spdlog::info("Root dir = {}", root_dir.string());
-    spdlog::info("Content dir = {}", content_dir.string());
+    spdlog::info("Resources dir = {}", resources_dir.string());
 
     // init the library, here we make a window so we only need the Video
     // capabilities.

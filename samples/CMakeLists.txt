@@ -10,12 +10,12 @@ target_link_libraries(HelloTriangle PRIVATE LVKLibrary)
 
 add_executable(EmptyApp empty_app.cpp)
 target_link_libraries(EmptyApp PRIVATE Ash)
-target_include_directories(EmptyApp PRIVATE "${ASH_ROOT_DIR}/src")
+target_include_directories(EmptyApp PRIVATE ${ASH_INCLUDE_DIR})
 
 add_executable(HelloCube hello_cube.cpp)
 target_link_libraries(HelloCube PRIVATE Ash)
-target_include_directories(HelloCube PRIVATE "${ASH_ROOT_DIR}/src")
+target_include_directories(HelloCube PRIVATE ${ASH_INCLUDE_DIR})
 
 add_executable(HelloCamera hello_camera.cpp)
 target_link_libraries(HelloCamera PRIVATE Ash)
-target_include_directories(HelloCamera PRIVATE "${ASH_ROOT_DIR}/src")
+target_include_directories(HelloCamera PRIVATE ${ASH_INCLUDE_DIR})

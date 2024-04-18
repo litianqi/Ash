@@ -1,5 +1,5 @@
 #include "camera_controller_component.h"
-#include "device/input_manager.h"
+#include "input/input_manager.h"
 #include "world/components/transform_component.h"
 #include "glm/glm.hpp"
 #include "glm/ext.hpp"

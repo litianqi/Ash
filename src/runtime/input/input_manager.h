@@ -1,7 +1,8 @@
 #pragma once
 
 #include <set>
-#include "SDL3/SDL.h"
+#include "SDL3/SDL_keycode.h"
+#include "SDL3/SDL_mouse.h"
 #include "glm/glm.hpp"
 
 using glm::vec2;

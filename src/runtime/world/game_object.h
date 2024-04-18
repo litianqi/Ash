@@ -1,7 +1,7 @@
 #pragma once
 
 #include <memory>
-#include "utils/slot_map_ptr.h"
+#include "core/slot_map_ptr.h"
 
 namespace ash
 {

@@ -4,7 +4,7 @@
 
 namespace ash
 {
-class EmptyApp : public BaseApp
+class EditorApp : public BaseApp
 {
   public:
     FPSCounter fps_counter;
@@ -12,13 +12,13 @@ class EmptyApp : public BaseApp
     void startup() override
     {
         BaseApp::startup();
-        spdlog::info("EmptyApp started!");
+        spdlog::info("EditorApp started!");
     }
     
     void cleanup() override
     {
         BaseApp::cleanup();
-        spdlog::info("EmptyApp stopped!");
+        spdlog::info("EditorApp stopped!");
     }
 
     void update(float dt) override
@@ -35,10 +35,10 @@ class EmptyApp : public BaseApp
             .color = {{.texture = swapchain_texture}},
         };
         lvk::RenderPass render_pass = {.color = {{
-                           .loadOp = lvk::LoadOp_Clear,
-                           .storeOp = lvk::StoreOp_Store,
-                           .clearColor = {0.0f, 0.0f, 0.0f, 1.0f},
-                       }}};
+                                           .loadOp = lvk::LoadOp_Clear,
+                                           .storeOp = lvk::StoreOp_Store,
+                                           .clearColor = {0.0f, 0.0f, 0.0f, 1.0f},
+                                       }}};
 
         imgui->beginFrame(framebuffer);
 
@@ -57,5 +57,5 @@ class EmptyApp : public BaseApp
 };
 }
 
-ASH_CREATE_APPLICATION(ash::EmptyApp)
+ASH_CREATE_APPLICATION(ash::EditorApp)
 

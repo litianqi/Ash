@@ -9,7 +9,8 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(Catch2)
 
 add_executable(AshTests world_test.cpp)
-target_include_directories(HelloCube PRIVATE "${ASH_ROOT_DIR}/src")
+
+target_include_directories(HelloCube PRIVATE ${ASH_INCLUDE_DIR})
 target_link_libraries(AshTests PRIVATE Ash Catch2::Catch2WithMain)
 
 list(APPEND CMAKE_MODULE_PATH ${catch2_SOURCE_DIR}/extras)

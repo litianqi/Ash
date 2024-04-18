@@ -5,7 +5,7 @@
 #include "glm/glm.hpp"
 //#include "SDL_timer.h"
 //#include "imgui/imgui_demo.cpp"
-#include "utils/fps_counter.h"
+#include "core/fps_counter.h"
 #include "world/world.h"
 #include "world/components/camera_component.h"
 #include "world/components/camera_controller_component.h"
@@ -261,7 +261,7 @@ class CameraApp : public BaseApp
         depth_state = {.compareOp = lvk::CompareOp_Less, .isDepthWriteEnabled = true};
 
         texture0 = create_xor_pattern_texture(*context);
-        texture1 = load_texture(*context, get_content_dir() / fs::path("wood_polished_01_diff.png"));
+        texture1 = load_texture(*context, get_resources_dir() / fs::path("wood_polished_01_diff.png"));
 
         sampler = context->createSampler({.debugName = "Sampler: linear"}, nullptr);
 
@@ -301,11 +301,11 @@ class CameraApp : public BaseApp
         {
             const vec3 location = vec3(-1.5f * sqrt(kNumCubes) + 4.0f * (i % cubes_in_line),
                                      -1.5f * sqrt(kNumCubes) + 4.0f * (i / cubes_in_line), 0);
-            cubes[i] = world.create_game_object(std::format("Cube {}", i), location);
+            cubes[i] = world.create(std::format("Cube {}", i), location);
         }
         // place a "camera" behind the cubes, the distance depends on the total number of cubes
         const auto camera_location = vec3(0.0f, 0.0f, -1.f *sqrtf(kNumCubes / 16) * 20.0f * half);
-        camera = world.create_game_object("Camera", camera_location);
+        camera = world.create("Camera", camera_location);
         auto* camera_component = camera->add_component<CameraComponent>();
         camera_component->fov = 45.0f * (glm::pi<float>() / 180.0f);
         camera_component->aspect_ratio = (float)display_width / (float)display_height;

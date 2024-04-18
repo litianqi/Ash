@@ -6,7 +6,7 @@ TEST_CASE("Create and destroy game object", "[World]")
 {
     ash::World world;
 
-    auto a = world.create_game_object("A", vec3(1, 2, 3));
+    auto a = world.create("A", vec3(1, 2, 3));
     REQUIRE(a.is_valid());
     REQUIRE(a->get_world() == &world);
     REQUIRE(a->get_name() == "A");
@@ -15,7 +15,7 @@ TEST_CASE("Create and destroy game object", "[World]")
     REQUIRE(a->get_transform()->get_euler_angles() == vec3(0, 0, 0));
     REQUIRE(a->get_transform()->get_scale() == vec3(1, 1, 1));
 
-    world.destroy_game_object(a);
+    world.destroy(a);
     REQUIRE_FALSE(a.is_valid());
 }
 
@@ -23,8 +23,8 @@ TEST_CASE("Attach and detach a game object to another", "[World]")
 {
     ash::World world;
 
-    auto a = world.create_game_object("A", vec3(1, 2, 3));
-    auto b = world.create_game_object("A", vec3(1, 2, 3));
+    auto a = world.create("A", vec3(1, 2, 3));
+    auto b = world.create("A", vec3(1, 2, 3));
     b->set_parent(a);
     REQUIRE(a.is_valid());
     REQUIRE(b->get_parent() == a);
@@ -71,7 +71,7 @@ TEST_CASE("Custom component", "[World]")
     
     REQUIRE(test_value == 0);
 
-    auto a = world.create_game_object("A", vec3(1, 2, 3));
+    auto a = world.create("A", vec3(1, 2, 3));
     auto* comp = a->add_component<TestComponent>();
     REQUIRE(test_value == 1);
     REQUIRE(a->get_components<TestComponent>().size() == 1);
@@ -85,7 +85,7 @@ TEST_CASE("Custom component", "[World]")
     
     a->add_component<TestComponent>();
     REQUIRE(test_value == 1);
-    
-    world.destroy_game_object(a);
+
+    world.destroy(a);
     REQUIRE(test_value == 0);
 }

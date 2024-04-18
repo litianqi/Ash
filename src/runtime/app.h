@@ -50,14 +50,14 @@ class BaseApp
     }
 
     [[nodiscard]]
-    fs::path get_content_dir() const
+    fs::path get_resources_dir() const
     {
-        return content_dir;
+        return resources_dir;
     }
 
   protected:
     fs::path root_dir;
-    fs::path content_dir;
+    fs::path resources_dir;
     uint32_t display_width = 1920;
     uint32_t display_height = 1080;
     SDL_Window* window = nullptr;
