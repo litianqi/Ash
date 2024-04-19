@@ -2,22 +2,20 @@
 
 #include <memory>
 #include <filesystem>
-#include "LVK.h"
+#include <typeindex>
 #include "spdlog/spdlog.h"
-#include "HelpersImGui.h"
+#include "app_subsystem.h"
 
 namespace fs = std::filesystem;
 struct SDL_Window;
-namespace lvk
-{
-class IContext;
-}
 
 namespace ash
 {
 class BaseApp
 {
   public:
+    static BaseApp* get();
+
     BaseApp() = default;
     virtual ~BaseApp() = default;
 
@@ -28,7 +26,6 @@ class BaseApp
     virtual void cleanup();
 
     // Returns true to exit the application.
-    [[nodiscard]]
     virtual bool is_done() const
     {
         return false;
@@ -43,13 +40,25 @@ class BaseApp
     // The resize method will be invoked when the window is resized.
     virtual void resize(uint32_t width, uint32_t height);
 
-    [[nodiscard]]
+    template <typename T, typename... Args>
+    T* add_subsystem(Args&&... args);
+
+    template <typename T>
+    void remove_subsystem();
+
+    template <typename T>
+    T* get_subsystem() const;
+    
+    SDL_Window* get_window() const
+    {
+        return window;
+    }
+
     fs::path get_root_dir() const
     {
         return root_dir;
     }
 
-    [[nodiscard]]
     fs::path get_resources_dir() const
     {
         return resources_dir;
@@ -61,11 +70,38 @@ class BaseApp
     uint32_t display_width = 1920;
     uint32_t display_height = 1080;
     SDL_Window* window = nullptr;
-    std::unique_ptr<lvk::IContext> context;
-    std::unique_ptr<lvk::ImGuiRenderer> imgui;
+    std::unordered_map<std::type_index, AppSubsystem*> subsystems;
+    
+    friend int run_application(BaseApp& app, int argc, char* argv[]);
 };
 
-extern BaseApp* g_app;
+template <typename T, typename... Args>
+T* BaseApp::add_subsystem(Args&&... args)
+{
+    auto* subsystem = new T(std::forward<Args>(args)...);
+    subsystems[typeid(T)] = subsystem;
+    return subsystem;
+}
+
+template <typename T>
+void BaseApp::remove_subsystem()
+{
+    if (auto it = subsystems.find(typeid(T)); it != subsystems.end())
+    {
+        delete it->second;
+        subsystems.erase(it);
+    }
+}
+
+template <typename T>
+T* BaseApp::get_subsystem() const
+{
+    if (auto it = subsystems.find(typeid(T)); it != subsystems.end())
+    {
+        return dynamic_cast<T*>(const_cast<AppSubsystem*>(it->second));
+    }
+    return nullptr;
+}
 
 int run_application(BaseApp& app, int argc, char* argv[]);
 } // namespace ash

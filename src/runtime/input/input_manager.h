@@ -4,6 +4,7 @@
 #include "SDL3/SDL_keycode.h"
 #include "SDL3/SDL_mouse.h"
 #include "glm/glm.hpp"
+#include "app/app_subsystem.h"
 
 using glm::vec2;
 
@@ -26,18 +27,10 @@ enum class MouseButton : uint8_t
     COUNT
 };
 
-class InputManager
+class InputManager : public AppSubsystem
 {
   public:
-    static InputManager& get()
-    {
-        static InputManager instance;
-        return instance;
-    }
-
-    InputManager() = default;
-    InputManager(const InputManager&) = delete;
-    void operator=(const InputManager&) = delete;
+    static InputManager* get();
 
     void tick();
 

@@ -34,7 +34,7 @@ void GameObject::set_parent(GameObjectPtr new_parent)
 
 void GameObject::add_child(GameObjectPtr child)
 {
-    if (child && std::find(children.begin(), children.end(), child) != children.end())
+    if (child && std::find(children.begin(), children.end(), child) == children.end())
     {
         children.push_back(child);
         child->parent = self;

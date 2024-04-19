@@ -1,5 +1,4 @@
-#include "app.h"
-#include "core/fps_counter.h"
+#include "ash.h"
 #include "SDL3/SDL_main.h"
 
 namespace ash
@@ -29,6 +28,9 @@ class EmptyApp : public BaseApp
     void render() override
     {
         LVK_PROFILER_FUNCTION();
+        
+        auto* context = Device::get()->get_context();
+        auto* imgui = Device::get()->get_imgui();
         
         lvk::TextureHandle swapchain_texture = context->getCurrentSwapchainTexture();
         lvk::Framebuffer framebuffer = {

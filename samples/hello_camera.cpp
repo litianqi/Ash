@@ -1,14 +1,10 @@
-#include "app.h"
+#include "ash.h"
 #include "SDL3/SDL_main.h"
 #include "stb/stb_image.h"
 #include "glm/ext.hpp"
 #include "glm/glm.hpp"
 //#include "SDL_timer.h"
 //#include "imgui/imgui_demo.cpp"
-#include "core/fps_counter.h"
-#include "world/world.h"
-#include "world/components/camera_component.h"
-#include "world/components/camera_controller_component.h"
 
 using glm::mat4;
 using glm::vec2;
@@ -229,6 +225,8 @@ class CameraApp : public BaseApp
     {
         BaseApp::startup();
         spdlog::info("Hello, Cube!");
+        
+        auto* context = Device::get()->get_context();
 
         // Vertex buffer, Index buffer and Vertex Input. Buffers are allocated in GPU memory.
         vb = context->createBuffer({.usage = lvk::BufferUsageBits_Storage,
@@ -357,6 +355,9 @@ class CameraApp : public BaseApp
     void render() override
     {
         LVK_PROFILER_FUNCTION();
+        
+        auto* context = Device::get()->get_context();
+        auto* imgui = Device::get()->get_imgui();
 
         lvk::TextureHandle swapchain_texture = context->getCurrentSwapchainTexture();
         framebuffer = {

@@ -1,4 +1,4 @@
-#include "app.h"
+#include "app/app.h"
 #include "core/fps_counter.h"
 #include "SDL3/SDL_main.h"
 

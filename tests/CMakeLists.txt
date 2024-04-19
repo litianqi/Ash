@@ -8,7 +8,9 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(Catch2)
 
-add_executable(AshTests world_test.cpp)
+add_executable(AshTests 
+        world_test.cpp
+        app_test.cpp)
 
 target_include_directories(HelloCube PRIVATE ${ASH_INCLUDE_DIR})
 target_link_libraries(AshTests PRIVATE Ash Catch2::Catch2WithMain)

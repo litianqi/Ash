@@ -24,13 +24,13 @@ namespace ash
 void FlyCameraControllerComponent::update(float dt)
 {
     assert(owner);
-    InputManager& input = InputManager::get();
+    InputManager* input = InputManager::get();
     auto* transform = owner->get_transform();
 
     // Update camera rotation
     {
-        auto mouse_delta = input.get_mouse_delta();
-        if (input.is_mouse_down(MouseButton::RIGHT) && glm::length(mouse_delta) > 0.f)
+        auto mouse_delta = input->get_mouse_delta();
+        if (input->is_mouse_down(MouseButton::RIGHT) && glm::length(mouse_delta) > 0.f)
         {
             mouse_delta *= look_sensitivity;
             pitch += mouse_delta.y;
@@ -43,10 +43,10 @@ void FlyCameraControllerComponent::update(float dt)
     // Update camera location
     {
         auto move_axis = vec2(0.f);
-        move_axis.x += input.is_key_down(SDLK_w) ? 1.f : 0.f;
-        move_axis.x += input.is_key_down(SDLK_s) ? -1.f : 0.f;
-        move_axis.y += input.is_key_down(SDLK_d) ? 1.f : 0.f;
-        move_axis.y += input.is_key_down(SDLK_a) ? -1.f : 0.f;
+        move_axis.x += input->is_key_down(SDLK_w) ? 1.f : 0.f;
+        move_axis.x += input->is_key_down(SDLK_s) ? -1.f : 0.f;
+        move_axis.y += input->is_key_down(SDLK_d) ? 1.f : 0.f;
+        move_axis.y += input->is_key_down(SDLK_a) ? -1.f : 0.f;
         if (glm::length(move_axis) > 0.f)
         {
             auto velocity =
@@ -61,13 +61,13 @@ void FlyCameraControllerComponent::update(float dt)
 void OrbitCameraControllerComponent::update(float dt)
 {
     assert(owner);
-    InputManager& input = InputManager::get();
+    InputManager* input = InputManager::get();
     auto* transform = owner->get_transform();
     
     // Update camera rotation
     {
-        auto mouse_delta = input.get_mouse_delta();
-        if (input.is_mouse_down(MouseButton::LEFT) && glm::length(mouse_delta) > 0.f)
+        auto mouse_delta = input->get_mouse_delta();
+        if (input->is_mouse_down(MouseButton::LEFT) && glm::length(mouse_delta) > 0.f)
         {
             mouse_delta *= look_sensitivity;
             pitch += mouse_delta.y;
@@ -79,7 +79,7 @@ void OrbitCameraControllerComponent::update(float dt)
 
     // Update camera location
     {
-        auto mouse_scroll_delta = input.get_mouse_scroll_delta();
+        auto mouse_scroll_delta = input->get_mouse_scroll_delta();
         if (glm::length(mouse_scroll_delta) > 0.f)
         {
             distance -= mouse_scroll_delta.y * scroll_sensitivity;

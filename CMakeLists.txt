@@ -118,6 +118,16 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(taskflow)
 
+function(setup_target_libs)
+endfunction()
+FetchContent_Declare(
+        offsetAllocator
+        GIT_REPOSITORY  https://github.com/sebbbi/OffsetAllocator.git
+        GIT_TAG         3610a7377088b1e8c8f1525f458c96038a4e6fc0
+        GIT_PROGRESS    TRUE
+)
+FetchContent_MakeAvailable(offsetAllocator)
+
 # -----------------------------------------------------------------------------
 # Ash Library
 # -----------------------------------------------------------------------------

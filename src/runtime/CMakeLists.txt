@@ -1,10 +1,15 @@
 add_library(Ash
-        app.cpp
-        app.h
+        ash.h
+        app/app.cpp
+        app/app.h
+        app/app_subsystem.cpp
+        app/app_subsystem.h
         core/fps_counter.h
         core/slot_map_ptr.h
         core/file.h
         core/math.h
+        gfx/device.cpp
+        gfx/device.h
         input/input_manager.cpp
         input/input_manager.h
         world/world.cpp

@@ -1,7 +1,17 @@
 #include "input_manager.h"
+#include "app/app.h"
 
 namespace ash
 {
+InputManager* InputManager::get()
+{
+    if (auto* app = BaseApp::get())
+    {
+        return app->get_subsystem<InputManager>();
+    }
+    return nullptr;
+}
+
 void InputManager::tick()
 {
     previous_key_down = key_down;

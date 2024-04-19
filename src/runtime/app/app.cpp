@@ -1,88 +1,20 @@
 #include "app.h"
 #include "SDL3/SDL.h"
-#include "SDL3/SDL_vulkan.h"
 #include "spdlog/spdlog.h"
 #include "minilog/minilog.h"
-#include "vulkan/VulkanClasses.h"
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 #include "input/input_manager.h"
-
-namespace
-{
-bool init_vulkan_context_with_swapchain(std::unique_ptr<lvk::VulkanContext>& ctx, uint32_t width, uint32_t height,
-                                        lvk::HWDeviceType preferred_device_type)
-{
-    using namespace lvk;
-    HWDeviceDesc device;
-    uint32_t num_devices = ctx->queryDevices(preferred_device_type, &device, 1);
-
-    if (!num_devices)
-    {
-        if (preferred_device_type == HWDeviceType_Discrete)
-        {
-            num_devices = ctx->queryDevices(HWDeviceType_Integrated, &device);
-        }
-        else if (preferred_device_type == HWDeviceType_Integrated)
-        {
-            num_devices = ctx->queryDevices(HWDeviceType_Discrete, &device);
-        }
-    }
-
-    if (!num_devices)
-    {
-        LVK_ASSERT_MSG(false, "GPU is not found");
-        return false;
-    }
-
-    Result res = ctx->initContext(device);
-
-    if (!res.isOk())
-    {
-        LVK_ASSERT_MSG(false, "Failed initContext()");
-        return false;
-    }
-
-    if (width > 0 && height > 0)
-    {
-        res = ctx->initSwapchain(width, height);
-        if (!res.isOk())
-        {
-            LVK_ASSERT_MSG(false, "Failed to create swapchain");
-            return false;
-        }
-    }
-    return true;
-}
-
-std::unique_ptr<lvk::IContext> create_vulkan_context_with_swapchain(
-    SDL_Window* window, uint32_t width, uint32_t height, const lvk::ContextConfig& cfg,
-    lvk::HWDeviceType preferred_device_type = lvk::HWDeviceType_Discrete)
-{
-    using namespace lvk;
-
-    std::unique_ptr<lvk::VulkanContext> ctx;
-    ctx = std::make_unique<lvk::VulkanContext>(cfg, nullptr);
-    VkSurfaceKHR surface;
-    bool result = SDL_Vulkan_CreateSurface(window, ctx->getVkInstance(), nullptr, &surface);
-    if (!result)
-    {
-        spdlog::error("Failed to create Vulkan surface, error: {}", SDL_GetError());
-        return nullptr;
-    }
-    ctx->setVkSurface(surface);
-    if (!init_vulkan_context_with_swapchain(ctx, width, height, preferred_device_type))
-    {
-        return nullptr;
-    }
-
-    return std::move(ctx);
-}
-} // namespace
+#include "gfx/device.h"
 
 namespace ash
 {
-BaseApp* g_app;
+static BaseApp* s_app;
+
+BaseApp* BaseApp::get()
+{
+    return s_app;
+}
 
 void BaseApp::startup()
 {
@@ -117,29 +49,30 @@ void BaseApp::startup()
 
     spdlog::info("Application started successfully!");
 
-    context = create_vulkan_context_with_swapchain(window, display_width, display_height, {});
-    imgui = std::make_unique<lvk::ImGuiRenderer>(*context);
+    add_subsystem<InputManager>();
+    add_subsystem<Device>(window, display_width, display_height);
 }
 
 void BaseApp::cleanup()
 {
-    imgui = nullptr;
-    context = nullptr;
+    remove_subsystem<Device>();
+    remove_subsystem<InputManager>();
     SDL_DestroyWindow(window);
     SDL_Quit();
+    window = nullptr;
 }
 
 void BaseApp::resize(uint32_t width, uint32_t height)
 {
     display_width = width;
     display_height = height;
-    context->recreateSwapchain(static_cast<int>(width), static_cast<int>(height));
+    get_subsystem<Device>()->resize(width, height);
     spdlog::info("Resized to {} x {}", width, height);
 }
 
 int run_application(BaseApp& app, int argc, char* argv[])
 {
-    g_app = &app;
+    s_app = &app;
 
     app.startup();
 
@@ -150,7 +83,7 @@ int run_application(BaseApp& app, int argc, char* argv[])
     
     while (!app.is_done() && !close_requested)
     {
-        InputManager::get().tick();
+        InputManager::get()->tick();
 
         SDL_Event event;
         while (SDL_PollEvent(&event))
@@ -190,7 +123,7 @@ int run_application(BaseApp& app, int argc, char* argv[])
                     {
                         ImGui::GetIO().MouseDown[ImGuiMouseButton_::ImGuiMouseButton_Middle] = true;
                     }
-                    InputManager::get().on_mouse_down(static_cast<MouseButton>(button));
+                    InputManager::get()->on_mouse_down(static_cast<MouseButton>(button));
                 }
                 break;
             }
@@ -210,27 +143,27 @@ int run_application(BaseApp& app, int argc, char* argv[])
                     {
                         ImGui::GetIO().MouseDown[ImGuiMouseButton_::ImGuiMouseButton_Middle] = false;
                     }
-                    InputManager::get().on_mouse_up(static_cast<MouseButton>(button));
+                    InputManager::get()->on_mouse_up(static_cast<MouseButton>(button));
                 }
                 break;
             }
             case SDL_EVENT_MOUSE_MOTION: {
                 ImGui::GetIO().MousePos = ImVec2(event.button.x, event.button.y);
-                InputManager::get().on_mouse_move({event.button.x, event.button.y});
+                InputManager::get()->on_mouse_move({event.button.x, event.button.y});
                 break;
             }
             case SDL_EVENT_MOUSE_WHEEL: {
                 ImGui::GetIO().MouseWheelH = event.wheel.x;
                 ImGui::GetIO().MouseWheel = event.wheel.y;
-                InputManager::get().on_mouse_scroll({event.wheel.x, event.wheel.y});
+                InputManager::get()->on_mouse_scroll({event.wheel.x, event.wheel.y});
                 break;
             }
             case SDL_EVENT_KEY_DOWN: {
-                InputManager::get().on_key_down(event.key.keysym.sym);
+                InputManager::get()->on_key_down(event.key.keysym.sym);
                 break;
             }
             case SDL_EVENT_KEY_UP: {
-                InputManager::get().on_key_up(event.key.keysym.sym);
+                InputManager::get()->on_key_up(event.key.keysym.sym);
                 break;
             }
             }
