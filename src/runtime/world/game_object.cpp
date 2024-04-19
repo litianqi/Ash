@@ -64,6 +64,7 @@ void GameObject::on_destroy()
     for (auto& component : components)
     {
         component->on_destroy();
+        delete component;
     }
     components.clear();
 }

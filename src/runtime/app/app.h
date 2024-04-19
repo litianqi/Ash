@@ -40,25 +40,31 @@ class BaseApp
     // The resize method will be invoked when the window is resized.
     virtual void resize(uint32_t width, uint32_t height);
 
+    // Adds a subsystem to the application.
     template <typename T, typename... Args>
     T* add_subsystem(Args&&... args);
 
+    // Removes a subsystem from the application.
     template <typename T>
     void remove_subsystem();
 
+    // Gets a subsystem from the application.
     template <typename T>
     T* get_subsystem() const;
     
+    // Gets the window handle.
     SDL_Window* get_window() const
     {
         return window;
     }
 
+    // Gets the root directory.
     fs::path get_root_dir() const
     {
         return root_dir;
     }
 
+    // Gets the resources directory.
     fs::path get_resources_dir() const
     {
         return resources_dir;
@@ -106,6 +112,7 @@ T* BaseApp::get_subsystem() const
 int run_application(BaseApp& app, int argc, char* argv[]);
 } // namespace ash
 
+// This macro creates the application entry point.
 #define ASH_CREATE_APPLICATION(app_class)                                                                              \
     int main(int argc, char* argv[])                                                                                   \
     {                                                                                                                  \

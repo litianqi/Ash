@@ -30,8 +30,10 @@ enum class MouseButton : uint8_t
 class InputManager : public AppSubsystem
 {
   public:
+    // Returns the singleton instance of the input manager.
     static InputManager* get();
 
+    // Updates the input manager state. This should be called at the start of each frame.
     void tick();
 
     // Returns whether the given key code is held down.
