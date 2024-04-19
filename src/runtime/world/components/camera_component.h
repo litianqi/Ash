@@ -24,16 +24,13 @@ class CameraComponent : public Component
 
     void set_look_direction(vec3 forward, vec3 up);
     
-    [[nodiscard]]
     mat4 get_view_matrix() const;
-
-    [[nodiscard]]
+    
     mat4 get_projection_matrix() const
     {
         return glm::perspectiveLH(fov, aspect_ratio, near, far);
     }
-
-    [[nodiscard]]
+    
     mat4 get_view_projection_matrix() const
     {
         return get_projection_matrix() * get_view_matrix();

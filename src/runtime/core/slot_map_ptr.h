@@ -14,8 +14,7 @@ class SlotMapPtr
     SlotMapPtr(stdext::slot_map<T>* slot_map,std::pair<unsigned, unsigned> key) : slot_map(slot_map), key(key)
     {
     }
-
-    [[nodiscard]]
+    
     bool is_valid() const
     {
         return slot_map && slot_map->find(key) != slot_map->end();
@@ -65,7 +64,7 @@ class SlotMapPtr
         return slot_map != other.slot_map || key != other.key;
     }
     
-    [[nodiscard]] std::pair<unsigned, unsigned> get_key() const
+    std::pair<unsigned, unsigned> get_key() const
     {
         return key;
     }

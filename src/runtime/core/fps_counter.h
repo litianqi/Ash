@@ -22,7 +22,6 @@ class FPSCounter
         }
     }
 
-    [[nodiscard]]
     float get_fps() const
     {
         return current_fps;

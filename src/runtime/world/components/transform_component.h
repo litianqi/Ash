@@ -29,8 +29,7 @@ class TransformComponent : public Component
         local_location = value;
         dirty = true;
     }
-
-    [[nodiscard]]
+    
     const vec3& get_local_location() const
     {
         return local_location;
@@ -42,7 +41,6 @@ class TransformComponent : public Component
         dirty = true;
     }
     
-    [[nodiscard]]
     const quat& get_local_rotation() const
     {
         return local_rotation;
@@ -53,7 +51,6 @@ class TransformComponent : public Component
         set_local_rotation(quat(value));
     }
     
-    [[nodiscard]]
     vec3 get_local_euler_angles() const
     {
         return eulerAngles(local_rotation);
@@ -64,8 +61,7 @@ class TransformComponent : public Component
         local_scale = value;
         dirty = true;
     }
-
-    [[nodiscard]]
+    
     const vec3& get_local_scale() const
     {
         return local_scale;
@@ -73,7 +69,6 @@ class TransformComponent : public Component
     
     void set_location(const vec3& value);
     
-    [[nodiscard]]
     vec3 get_location() const;
 
     void set_rotation(const quat& value)
@@ -81,16 +76,14 @@ class TransformComponent : public Component
         local_rotation = value;
         dirty = true;
     }
-
-    [[nodiscard]]
+    
     quat get_rotation() const;
 
     void set_euler_angles(const vec3& value)
     {
         set_rotation(quat(value));
     }
-
-    [[nodiscard]]
+    
     vec3 get_euler_angles() const
     {
         return eulerAngles(get_rotation());
@@ -101,54 +94,45 @@ class TransformComponent : public Component
         local_scale = value;
         dirty = true;
     }
-
-    [[nodiscard]]
+    
     vec3 get_scale() const;
-
-    [[nodiscard]]
+    
     vec3 get_forward() const
     {
         return mat3_cast(local_rotation) * FORWARD_VECTOR;
     }
-
-    [[nodiscard]]
+    
     vec3 get_backward() const
     {
         return mat3_cast(local_rotation) * BACKWARD_VECTOR;
     }
     
-    [[nodiscard]]
     vec3 get_left() const
     {
         return mat3_cast(local_rotation) * LEFT_VECTOR;
     }
     
-    [[nodiscard]]
     vec3 get_right() const
     {
         return mat3_cast(local_rotation) * RIGHT_VECTOR;
     }
     
-    [[nodiscard]]
     vec3 get_up() const
     {
         return mat3_cast(local_rotation) * UP_VECTOR;
     }
     
-    [[nodiscard]]
     vec3 get_down() const
     {
         return mat3_cast(local_rotation) * DOWN_VECTOR;
     }
 
     void set_local_to_parent(const mat4& matrix);
-
-    [[nodiscard]]
+    
     const mat4& get_local_to_parent() const;
 
     void set_local_to_world(const mat4& matrix);
-
-    [[nodiscard]]
+    
     mat4 get_local_to_world() const;
 
   private:

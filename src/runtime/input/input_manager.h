@@ -35,63 +35,54 @@ class InputManager : public AppSubsystem
     void tick();
 
     // Returns whether the given key code is held down.
-    [[nodiscard]]
     bool is_key_down(KeyCode key) const
     {
         return key_down.contains(key);
     }
 
     // Returns true during the frame the user pressed the given key code.
-    [[nodiscard]]
     bool is_key_pressed(KeyCode key) const
     {
         return key_down.contains(key) && !previous_key_down.contains(key);
     }
 
     // Returns true during the frame the user releases the given key code.
-    [[nodiscard]]
     bool is_key_released(KeyCode key) const
     {
         return !key_down.contains(key) && previous_key_down.contains(key);
     }
 
     // Returns whether the given mouse button is held down.
-    [[nodiscard]]
     bool is_mouse_down(MouseButton button) const
     {
         return mouse_down.contains(button);
     }
 
     // Returns true during the frame the user pressed the given mouse button.
-    [[nodiscard]]
     bool is_mouse_pressed(MouseButton button) const
     {
         return mouse_down.contains(button) && !previous_mouse_down.contains(button);
     }
 
     // Returns true during the frame the user releases the given mouse button.
-    [[nodiscard]]
     bool is_mouse_released(MouseButton button) const
     {
         return !mouse_down.contains(button) && previous_mouse_down.contains(button);
     }
 
     // Returns the current mouse position, relative to window.
-    [[nodiscard]]
     vec2 get_mouse_position() const
     {
         return mouse_position;
     }
 
     // Returns the current mouse delta.
-    [[nodiscard]]
     vec2 get_mouse_delta() const
     {
         return mouse_position - previous_mouse_position;
     }
 
     // Returns the current mouse scroll delta.
-    [[nodiscard]]
     vec2 get_mouse_scroll_delta() const
     {
         return mouse_scroll_delta;

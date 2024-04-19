@@ -20,8 +20,7 @@ class GameObject
     void update(float dt);
 
     void set_parent(GameObjectPtr new_parent);
-
-    [[nodiscard]]
+    
     GameObjectPtr get_parent() const
     {
         return parent;
@@ -30,8 +29,7 @@ class GameObject
     void add_child(GameObjectPtr child);
 
     void remove_child(GameObjectPtr child);
-
-    [[nodiscard]]
+    
     const std::vector<GameObjectPtr>& get_children() const
     {
         return children;
@@ -51,20 +49,17 @@ class GameObject
 
     template <class T>
     std::vector<T*> get_components() const;
-
-    [[nodiscard]]
+    
     World* get_world() const
     {
         return world;
     }
     
-    [[nodiscard]]
     const std::string& get_name() const
     {
         return name;
     }
-
-    [[nodiscard]]
+    
     TransformComponent* get_transform() const;
 
   private:

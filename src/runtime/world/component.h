@@ -21,14 +21,12 @@ class Component
     virtual void update(float dt)
     {
     }
-
-    [[nodiscard]]
+    
     GameObjectPtr get_owner() const
     {
         return owner;
     }
     
-    [[nodiscard]]
     World* get_world() const
     {
         assert(owner);
