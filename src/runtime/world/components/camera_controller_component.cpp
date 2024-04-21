@@ -38,10 +38,10 @@ void FlyCameraControllerComponent::update(float dt)
     // Update camera location
     {
         auto move_axis = vec2(0.f);
-        move_axis.x += input->is_key_down(SDLK_w) ? 1.f : 0.f;
-        move_axis.x += input->is_key_down(SDLK_s) ? -1.f : 0.f;
-        move_axis.y += input->is_key_down(SDLK_d) ? 1.f : 0.f;
-        move_axis.y += input->is_key_down(SDLK_a) ? -1.f : 0.f;
+        move_axis.x += input->is_key_down(KeyCode::W) ? 1.f : 0.f;
+        move_axis.x += input->is_key_down(KeyCode::S) ? -1.f : 0.f;
+        move_axis.y += input->is_key_down(KeyCode::D) ? 1.f : 0.f;
+        move_axis.y += input->is_key_down(KeyCode::A) ? -1.f : 0.f;
         if (glm::length(move_axis) > 0.f)
         {
             auto velocity =

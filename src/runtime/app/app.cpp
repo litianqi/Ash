@@ -159,11 +159,11 @@ int run_application(BaseApp& app, int argc, char* argv[])
                 break;
             }
             case SDL_EVENT_KEY_DOWN: {
-                InputManager::get()->on_key_down(event.key.keysym.sym);
+                InputManager::get()->on_key_down(static_cast<KeyCode>(event.key.keysym.sym));
                 break;
             }
             case SDL_EVENT_KEY_UP: {
-                InputManager::get()->on_key_up(event.key.keysym.sym);
+                InputManager::get()->on_key_up(static_cast<KeyCode>(event.key.keysym.sym));
                 break;
             }
             }

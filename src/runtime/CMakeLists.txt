@@ -11,6 +11,7 @@ add_library(Ash
         gfx/device.h
         input/input_manager.cpp
         input/input_manager.h
+        input/input_types.h
         world/world.cpp
         world/world.h
         world/game_object.cpp
@@ -21,6 +22,8 @@ add_library(Ash
         world/components/camera_controller_component.h
         world/component.h
 )
+
+target_compile_definitions(Ash PUBLIC NOGDI) # disable wingdi.h
 
 target_include_directories(Ash PUBLIC ${ASH_INCLUDE_DIR})
 target_include_directories(Ash PUBLIC ${VULKAN_PATH}/Include)

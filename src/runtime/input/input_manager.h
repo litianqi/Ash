@@ -1,31 +1,15 @@
 #pragma once
 
 #include <set>
-#include "SDL3/SDL_keycode.h"
-#include "SDL3/SDL_mouse.h"
 #include "glm/glm.hpp"
 #include "app/app_subsystem.h"
+#include "input_types.h"
 
 using glm::vec2;
 
 namespace ash
 {
 class BaseApp;
-
-using KeyCode  = SDL_Keycode;
-
-enum class MouseButton : uint8_t
-{
-    INVALID = 0,
-
-    LEFT = SDL_BUTTON_LEFT,
-    RIGHT = SDL_BUTTON_RIGHT,
-    MIDDLE = SDL_BUTTON_MIDDLE,
-    X1 = SDL_BUTTON_X1,
-    X2 = SDL_BUTTON_X2,
-
-    COUNT
-};
 
 class InputManager : public AppSubsystem
 {
@@ -55,21 +39,21 @@ class InputManager : public AppSubsystem
     }
 
     // Returns whether the given mouse button is held down.
-    bool is_mouse_down(MouseButton button) const
+    bool is_mouse_down(MouseButton mouse) const
     {
-        return mouse_down.contains(button);
+        return mouse_down.contains(mouse);
     }
 
     // Returns true during the frame the user pressed the given mouse button.
-    bool is_mouse_pressed(MouseButton button) const
+    bool is_mouse_pressed(MouseButton mouse) const
     {
-        return mouse_down.contains(button) && !previous_mouse_down.contains(button);
+        return mouse_down.contains(mouse) && !previous_mouse_down.contains(mouse);
     }
 
     // Returns true during the frame the user releases the given mouse button.
-    bool is_mouse_released(MouseButton button) const
+    bool is_mouse_released(MouseButton mouse) const
     {
-        return !mouse_down.contains(button) && previous_mouse_down.contains(button);
+        return !mouse_down.contains(mouse) && previous_mouse_down.contains(mouse);
     }
 
     // Returns the current mouse position, relative to window.
