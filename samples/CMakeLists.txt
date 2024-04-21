@@ -2,8 +2,7 @@ add_executable(HelloWindow hello_window.cpp)
 target_link_libraries(HelloWindow PRIVATE SDL3::SDL3)
 target_link_libraries(HelloWindow PRIVATE spdlog::spdlog_header_only)
 
-add_executable(HelloTriangle hello_triangle.cpp
-               hello_cube.cpp)
+add_executable(HelloTriangle hello_triangle.cpp)
 target_link_libraries(HelloTriangle PRIVATE SDL3::SDL3)
 target_link_libraries(HelloTriangle PRIVATE spdlog::spdlog_header_only)
 target_link_libraries(HelloTriangle PRIVATE LVKLibrary)
