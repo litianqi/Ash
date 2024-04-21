@@ -19,3 +19,7 @@ target_include_directories(HelloCube PRIVATE ${ASH_INCLUDE_DIR})
 add_executable(HelloCamera hello_camera.cpp)
 target_link_libraries(HelloCamera PRIVATE Ash)
 target_include_directories(HelloCamera PRIVATE ${ASH_INCLUDE_DIR})
+
+add_executable(HelloGltf hello_gltf.cpp)
+target_link_libraries(HelloGltf PRIVATE Ash)
+target_include_directories(HelloGltf PRIVATE ${ASH_INCLUDE_DIR})
