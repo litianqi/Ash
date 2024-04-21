@@ -2,7 +2,6 @@ add_library(Ash
         ash.h
         app/app.cpp
         app/app.h
-        app/app_subsystem.cpp
         app/app_subsystem.h
         core/fps_counter.h
         core/slot_map_ptr.h
