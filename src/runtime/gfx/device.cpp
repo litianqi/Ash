@@ -90,6 +90,29 @@ Device::Device(SDL_Window* window, uint32_t width, uint32_t height)
 {
     context = create_vulkan_context_with_swapchain(window, width, height, {});
     imgui = std::make_unique<lvk::ImGuiRenderer>(*context);
+    
+    const uint32_t pixel = 0xFFFFFFFF;
+    white_texture = context->createTexture(
+        {
+            .type = lvk::TextureType_2D,
+            .format = lvk::Format_R_UN8,
+            .dimensions = {1, 1},
+            .usage = lvk::TextureUsageBits_Sampled,
+            .swizzle = {lvk::Swizzle_1, lvk::Swizzle_1, lvk::Swizzle_1, lvk::Swizzle_1},
+            .data = &pixel,
+            .debugName = "Texture: 1x1 white",
+        },
+        nullptr);
+    linear_sampler = context->createSampler(
+        {
+            .mipMap = lvk::SamplerMip_Linear,
+            .wrapU = lvk::SamplerWrap_Repeat,
+            .wrapV = lvk::SamplerWrap_Repeat,
+            .debugName = "Sampler: linear",
+        },
+        nullptr);
+    
+    material_buffer = std::make_unique<StorageBuffer>(context.get(), 12 * 1024 * 1024, "material buffer");
 }
 
 void Device::resize(uint32_t width, uint32_t height)

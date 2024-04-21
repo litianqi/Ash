@@ -18,6 +18,8 @@ BaseApp* BaseApp::get()
 
 void BaseApp::startup()
 {
+    s_app = this;
+
     minilog::initialize(nullptr, {.logLevelPrintToConsole = minilog::Warning, .threadNames = false});
 
     fs::path dir = fs::current_path();
@@ -72,8 +74,6 @@ void BaseApp::resize(uint32_t width, uint32_t height)
 
 int run_application(BaseApp& app, int argc, char* argv[])
 {
-    s_app = &app;
-
     app.startup();
 
     bool close_requested = false;

@@ -8,3 +8,5 @@
 #include "world/world.h"
 #include "world/components/camera_component.h"
 #include "world/components/camera_controller_component.h"
+#include "world/components/mesh_component.h"
+#include "resource/gltf_loader.h"

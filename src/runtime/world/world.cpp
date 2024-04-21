@@ -40,4 +40,13 @@ void World::update(float dt)
         game_object.update(dt);
     }
 }
+
+World::~World()
+{
+    for (auto& game_object : game_objects)
+    {
+        game_object.on_destroy();
+    }
+    game_objects.clear();
+}
 } // namespace ash

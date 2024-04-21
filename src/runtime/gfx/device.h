@@ -3,6 +3,7 @@
 #include "LVK.h"
 #include "HelpersImGui.h"
 #include "app/app_subsystem.h"
+#include "storage_buffer.h"
 
 struct SDL_Window;
 
@@ -20,13 +21,26 @@ class Device : public AppSubsystem
     void resize(uint32_t width, uint32_t height);
     
     // Gets the context.
-    lvk::IContext* get_context() { return context.get(); }
+    lvk::IContext* get_context() const { return context.get(); }
     
     // Gets the ImGui renderer.
-    lvk::ImGuiRenderer* get_imgui() { return imgui.get(); }
+    lvk::ImGuiRenderer* get_imgui() const { return imgui.get(); }
+    
+    // Gets the white texture.
+    lvk::TextureHandle get_white_texture() const { return white_texture; }
+    
+    // Gets the  linear sampler.
+    lvk::SamplerHandle get_linear_sampler() const { return linear_sampler; }
+    
+    // Returns the material buffer.
+    StorageBuffer* get_material_buffer() const { return material_buffer.get(); }
 
   private:
     std::unique_ptr<lvk::IContext> context;
     std::unique_ptr<lvk::ImGuiRenderer> imgui;
+    lvk::Holder<lvk::TextureHandle> white_texture;
+    lvk::Holder<lvk::SamplerHandle> linear_sampler;
+    std::unique_ptr<StorageBuffer> material_buffer;
+//    OffsetAllocator::Allocation default_material;
 };
 } // namespace ash

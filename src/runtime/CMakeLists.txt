@@ -21,6 +21,16 @@ add_library(Ash
         world/components/camera_controller_component.cpp
         world/components/camera_controller_component.h
         world/component.h
+        resource/resource.h
+        resource/mesh_resource.h
+        resource/material_resource.h
+        resource/texture_resource.h
+        resource/gltf_loader.cpp
+        resource/gltf_loader.h
+        gfx/storage_buffer.cpp
+        gfx/storage_buffer.h
+        world/components/mesh_component.cpp
+        world/components/mesh_component.h
 )
 
 target_compile_definitions(Ash PUBLIC NOGDI) # disable wingdi.h
@@ -37,4 +47,6 @@ target_link_libraries(Ash PUBLIC fastgltf::fastgltf)
 target_link_libraries(Ash PUBLIC spdlog::spdlog_header_only)
 target_link_libraries(Ash PUBLIC sg14)
 target_link_libraries(Ash PUBLIC Taskflow)
+target_include_directories(Ash PUBLIC ${offsetAllocator_SOURCE_DIR})
+target_link_libraries(Ash PUBLIC offsetAllocator)
 
