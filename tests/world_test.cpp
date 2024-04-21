@@ -1,6 +1,5 @@
 #include <catch2/catch_test_macros.hpp>
-#include "world/world.h"
-#include "world/components/transform_component.h"
+#include "ash.h"
 
 TEST_CASE("Create and destroy game object", "[World]")
 {
@@ -10,10 +9,9 @@ TEST_CASE("Create and destroy game object", "[World]")
     REQUIRE(a.is_valid());
     REQUIRE(a->get_world() == &world);
     REQUIRE(a->get_name() == "A");
-    REQUIRE(a->get_transform()->get_location() == vec3(1, 2, 3));
-    REQUIRE(a->get_transform()->get_rotation() == quat(1, 0, 0, 0));
-    REQUIRE(a->get_transform()->get_euler_angles() == vec3(0, 0, 0));
-    REQUIRE(a->get_transform()->get_scale() == vec3(1, 1, 1));
+    REQUIRE(a->get_location() == vec3(1, 2, 3));
+    REQUIRE(a->get_rotation() == quat(1, 0, 0, 0));
+    REQUIRE(a->get_scale() == vec3(1, 1, 1));
 
     world.destroy(a);
     REQUIRE_FALSE(a.is_valid());
@@ -30,9 +28,9 @@ TEST_CASE("Attach and detach a game object to another", "[World]")
     REQUIRE(b->get_parent() == a);
     REQUIRE(a->get_children().size() == 1);
     REQUIRE(a->get_children()[0] == b);
-    REQUIRE(a->get_transform()->get_location() == vec3(1, 2, 3));
-    REQUIRE(b->get_transform()->get_local_location() == vec3(1, 2, 3));
-    REQUIRE(b->get_transform()->get_location() == vec3(2, 4, 6));
+    REQUIRE(a->get_location() == vec3(1, 2, 3));
+    REQUIRE(b->get_local_location() == vec3(1, 2, 3));
+    REQUIRE(b->get_location() == vec3(2, 4, 6));
 
     a->remove_child(b);
     REQUIRE_FALSE(b->get_parent().is_valid());

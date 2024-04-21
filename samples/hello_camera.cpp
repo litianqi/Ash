@@ -338,7 +338,7 @@ class CameraApp : public BaseApp
                 camera->remove_components<OrbitCameraControllerComponent>();
                 camera->add_component<FlyCameraControllerComponent>();
                 const auto camera_location = vec3(0.0f, 0.0f, -1.f *sqrtf(kNumCubes / 16) * 20.0f * half);
-                camera->get_transform()->set_location(camera_location);
+                camera->set_location(camera_location);
             }
         }
         else
@@ -384,7 +384,7 @@ class CameraApp : public BaseApp
 
         for (uint32_t i = 0; i != kNumCubes; i++)
         {
-            per_object[i].model = cubes[i]->get_transform()->get_local_to_world();
+            per_object[i].model = cubes[i]->get_matrix();
         }
         context->upload(ub_per_object[frame_index], &per_object, sizeof(per_object));
 

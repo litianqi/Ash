@@ -16,8 +16,6 @@ add_library(Ash
         world/world.h
         world/game_object.cpp
         world/game_object.h
-        world/components/transform_component.cpp
-        world/components/transform_component.h
         world/components/camera_component.cpp
         world/components/camera_component.h
         world/components/camera_controller_component.cpp

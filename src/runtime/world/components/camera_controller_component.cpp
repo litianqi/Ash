@@ -1,10 +1,6 @@
 #include "camera_controller_component.h"
 #include "input/input_manager.h"
-#include "world/components/transform_component.h"
-#include "glm/glm.hpp"
-#include "glm/ext.hpp"
-#define GLM_ENABLE_EXPERIMENTAL
-#include "glm/gtx/quaternion.hpp"
+#include "core/math.h"
 #include "spdlog/spdlog.h"
 
 using glm::vec3;
@@ -25,7 +21,6 @@ void FlyCameraControllerComponent::update(float dt)
 {
     assert(owner);
     InputManager* input = InputManager::get();
-    auto* transform = owner->get_transform();
 
     // Update camera rotation
     {
@@ -37,7 +32,7 @@ void FlyCameraControllerComponent::update(float dt)
             yaw += mouse_delta.x;
         }
         auto new_rotation = pitch_yaw_rotation(pitch, yaw);
-        transform->set_rotation(new_rotation);
+        owner->set_rotation(new_rotation);
     }
 
     // Update camera location
@@ -50,10 +45,10 @@ void FlyCameraControllerComponent::update(float dt)
         if (glm::length(move_axis) > 0.f)
         {
             auto velocity =
-                glm::normalize(transform->get_forward() * move_axis.x + transform->get_right() * move_axis.y) * move_speed;
+                glm::normalize(owner->get_forward() * move_axis.x + owner->get_right() * move_axis.y) * move_speed;
             auto move_delta = velocity * dt;
-            auto new_location = transform->get_location() + move_delta;
-            transform->set_location(new_location);
+            auto new_location = owner->get_location() + move_delta;
+            owner->set_location(new_location);
         }
     }
 }
@@ -62,7 +57,6 @@ void OrbitCameraControllerComponent::update(float dt)
 {
     assert(owner);
     InputManager* input = InputManager::get();
-    auto* transform = owner->get_transform();
     
     // Update camera rotation
     {
@@ -74,7 +68,7 @@ void OrbitCameraControllerComponent::update(float dt)
             yaw += mouse_delta.x;
         }
         auto new_rotation = pitch_yaw_rotation(pitch, yaw);
-        transform->set_rotation(new_rotation);
+        owner->set_rotation(new_rotation);
     }
 
     // Update camera location
@@ -85,8 +79,8 @@ void OrbitCameraControllerComponent::update(float dt)
             distance -= mouse_scroll_delta.y * scroll_sensitivity;
             distance = glm::clamp(distance, min_distance, max_distance);
         }
-        auto new_location = pivot + transform->get_backward() * distance;
-        transform->set_location(new_location);
+        auto new_location = pivot + owner->get_forward() * -1.f * distance;
+        owner->set_location(new_location);
     }
 }
 } // namespace ash

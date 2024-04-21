@@ -1,9 +1,8 @@
 #include "world.h"
-#include "world/components/transform_component.h"
 
 namespace ash
 {
-World::World() : render_world(std::make_unique<RenderWorld>())
+World::World() //: render_world(std::make_unique<RenderWorld>())
 {
 }
 
@@ -17,10 +16,9 @@ GameObjectPtr World::create(const std::string& name, const vec3& location, const
     game_object.name = name;
     game_object.self = ptr;
 
-    auto* transform = game_object.add_component<TransformComponent>();
-    transform->set_location(location);
-    transform->set_rotation(rotation);
-    transform->set_scale(scale);
+    game_object.set_location(location);
+    game_object.set_rotation(rotation);
+    game_object.set_scale(scale);
 
     return ptr;
 }

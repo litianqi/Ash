@@ -2,9 +2,7 @@
 
 #include <numbers>
 #include "world/component.h"
-#include "world/components/transform_component.h"
-#include "glm/glm.hpp"
-#include "glm/ext.hpp"
+#include "core/math.h"
 #undef near
 #undef far
 

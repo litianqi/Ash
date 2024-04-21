@@ -1,10 +1,7 @@
 #pragma once
 
 #include "world/component.h"
-#include "glm/glm.hpp"
-
-using glm::vec2;
-using glm::vec3;
+#include "core/math.h"
 
 namespace ash
 {
