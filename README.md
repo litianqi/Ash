@@ -1,6 +1,4 @@
-# Ash (WIP)
-
-Ash is a mini game engine based on Vulkan. The plan is to learn and practice modern rendering technologies such as bindless, gpu driven, render graph (frame graph), mesh shader, ray tracing, etc. in it.
+Ash is a tiny game engine based on Vulkan. I use it as a playground for learning modern rendering techniques, such as bindless, GPU driven rendering, multithreaded rendering, frame graph (render graph), mesh shader, ray tracing, etc.
 
 ## Directory Structure
 
@@ -16,23 +14,9 @@ Ash is a mini game engine based on Vulkan. The plan is to learn and practice mod
  ┗ 📜CMakeLists.txt
 ```
 
-## Code Structure
+## Dependencies
 
-```
-📦src
- ┣ 📂editor            -- editor source code
- ┃ ┗ 📜editor.cpp
- ┗ 📂runtime           -- ash library source code
-   ┣ 📂app             -- app framework
-   ┣ 📂core            -- io, math, etc.
-   ┣ 📂resource        -- resource types
-   ┣ 📂input           -- input manager
-   ┣ 📂physics         -- physics system
-   ┣ 📂renderer        -- rendering system
-   ┗ 📂world           -- scene graph
-```
-
-## Third-party Libraries
+Ash uses the following open-source libraries:
 
 - [lightweightvk](https://github.com/litianqi/lightweightvk)
 - [SDL3](https://github.com/libsdl-org/SDL)
