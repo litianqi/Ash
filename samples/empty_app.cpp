@@ -27,7 +27,7 @@ class EmptyApp : public BaseApp
 
     void render() override
     {
-        LVK_PROFILER_FUNCTION();
+        ZoneScoped;
         
         auto* context = Device::get()->get_context();
         auto* imgui = Device::get()->get_imgui();

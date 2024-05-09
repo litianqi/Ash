@@ -71,7 +71,7 @@ void GameObject::on_destroy()
     components.clear();
 }
 
-void GameObject::remove_components(const type_info& type)
+void GameObject::remove_components(const std::type_info& type)
 {
     for (auto it = components.begin(); it != components.end();)
     {

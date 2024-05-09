@@ -128,11 +128,8 @@ class GltfApp : public BaseApp
     lvk::RenderPass render_pass;
     lvk::DepthState depth_state;
 
-    void startup() override
+    void create_depth_buffer()
     {
-        BaseApp::startup();
-        spdlog::info("Hello, glTF!");
-
         auto* context = Device::get()->get_context();
 
         lvk::TextureDesc descDepth = {
@@ -155,6 +152,16 @@ class GltfApp : public BaseApp
             .debugName = "Offscreen framebuffer (color)",
         };
         depth_buffer = context->createTexture(descDepth);
+    }
+
+    void startup() override
+    {
+        BaseApp::startup();
+        spdlog::info("Hello, glTF!");
+
+        auto* context = Device::get()->get_context();
+
+        create_depth_buffer();
 
         depth_state = {.compareOp = lvk::CompareOp_Less, .isDepthWriteEnabled = true};
 
@@ -256,6 +263,12 @@ class GltfApp : public BaseApp
         BaseApp::cleanup();
     }
 
+    void resize(uint32_t width, uint32_t height) override
+    {
+        BaseApp::resize(width, height);
+        create_depth_buffer();
+    }
+
     void update(float dt) override
     {
         fps_counter.tick(dt);
@@ -283,7 +296,7 @@ class GltfApp : public BaseApp
 
     void render() override
     {
-        LVK_PROFILER_FUNCTION();
+        ZoneScoped;
 
         auto* context = Device::get()->get_context();
         auto* imgui = Device::get()->get_imgui();

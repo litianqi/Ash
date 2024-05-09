@@ -1,6 +1,7 @@
 #pragma once
 
 #include <filesystem>
+#include <optional>
 #include "world/game_object.h"
 #include "mesh_resource.h"
 

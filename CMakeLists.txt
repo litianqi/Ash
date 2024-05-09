@@ -66,6 +66,7 @@ FetchContent_MakeAvailable(stb)
 set(LVK_DEPLOY_DEPS ON)
 set(LVK_WITH_GLFW OFF)
 set(LVK_WITH_SAMPLES OFF)
+set(TRACY_DELAYED_INIT ON)
 FetchContent_Declare(
         lvk
         GIT_REPOSITORY  https://github.com/litianqi/lightweightvk.git
