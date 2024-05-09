@@ -218,9 +218,10 @@ class GltfApp : public BaseApp
                 }
             }
         };
-//         load_model(get_resources_dir() / "BoxTextured/glTF-Binary/BoxTextured.glb");
+        // load_model(get_resources_dir() / "BoxTextured/glTF-Binary/BoxTextured.glb");
         // load_model(get_resources_dir() / "FlightHelmet/glTF/FlightHelmet.gltf");
         // load_model(get_resources_dir() / "DamagedHelmet/glTF-Binary/DamagedHelmet.glb");
+        // load_gltf(get_resources_dir() / "Bistro_Godot.glb", *world);
         load_model(get_resources_dir() / "Sponza/glTF/Sponza.gltf");
         assert(!renderables.empty());
 

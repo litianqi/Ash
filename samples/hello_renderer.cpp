@@ -29,6 +29,7 @@ class RendererApp : public BaseApp
         // load_gltf(get_resources_dir() / "BoxTextured/glTF-Binary/BoxTextured.glb", *world);
         // load_gltf(get_resources_dir() / "FlightHelmet/glTF/FlightHelmet.gltf", *world);
         // load_gltf(get_resources_dir() / "DamagedHelmet/glTF-Binary/DamagedHelmet.glb", *world);
+        // load_gltf(get_resources_dir() / "Bistro_Godot.glb", *world);
         load_gltf(get_resources_dir() / "Sponza/glTF/Sponza.gltf", *world);
 
         //> create camera
