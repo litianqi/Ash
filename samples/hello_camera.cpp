@@ -3,8 +3,8 @@
 #include "stb/stb_image.h"
 #include "glm/ext.hpp"
 #include "glm/glm.hpp"
-//#include "SDL_timer.h"
-//#include "imgui/imgui_demo.cpp"
+// #include "SDL_timer.h"
+// #include "imgui/imgui_demo.cpp"
 
 using glm::mat4;
 using glm::vec2;
@@ -193,6 +193,11 @@ lvk::Holder<lvk::TextureHandle> create_xor_pattern_texture(lvk::IContext& contex
         nullptr);
 }
 
+enum class CameraControllerType : int
+{
+    Fly = 0,
+    Orbit = 1,
+};
 } // namespace
 
 namespace ash
@@ -205,7 +210,7 @@ class CameraApp : public BaseApp
     World world;
     GameObjectPtr cubes[kNumCubes] = {};
     GameObjectPtr camera;
-    int camera_controller_type = 0; // 0: fly camera, 1: orbit camera
+    CameraControllerType camera_controller_type = CameraControllerType::Fly;
     UniformsPerObject per_object[kNumCubes] = {};
 
     uint32_t frame_index = 0;
@@ -225,7 +230,7 @@ class CameraApp : public BaseApp
     {
         BaseApp::startup();
         spdlog::info("Hello, Cube!");
-        
+
         auto* context = Device::get()->get_context();
 
         // Vertex buffer, Index buffer and Vertex Input. Buffers are allocated in GPU memory.
@@ -292,22 +297,20 @@ class CameraApp : public BaseApp
                 .debugName = "Pipeline: mesh",
             },
             nullptr);
-        
+
         // Setup world
         const auto cubes_in_line = (uint32_t)sqrt(kNumCubes);
         for (int32_t i = 0; i < kNumCubes; i++)
         {
             const vec3 location = vec3(-1.5f * sqrt(kNumCubes) + 4.0f * (i % cubes_in_line),
-                                     -1.5f * sqrt(kNumCubes) + 4.0f * (i / cubes_in_line), 0);
+                                       -1.5f * sqrt(kNumCubes) + 4.0f * (i / cubes_in_line), 0);
             cubes[i] = world.create(std::format("Cube {}", i), location);
         }
-        // place a "camera" behind the cubes, the distance depends on the total number of cubes
-        const auto camera_location = vec3(0.0f, 0.0f, -1.f *sqrtf(kNumCubes / 16) * 20.0f * half);
-        camera = world.create("Camera", camera_location);
+        camera = world.create("Camera", vec3(0.f));
         auto* camera_component = camera->add_component<CameraComponent>();
         camera_component->fov = 45.0f * (glm::pi<float>() / 180.0f);
         camera_component->aspect_ratio = (float)display_width / (float)display_height;
-        camera->add_component<FlyCameraControllerComponent>();
+        add_or_update_camera_controller();
     }
 
     void cleanup() override
@@ -331,41 +334,44 @@ class CameraApp : public BaseApp
     {
         fps_counter.tick(dt);
         frame_index = (frame_index + 1) % kNumBufferedFrames;
-        if (camera_controller_type == 0)
-        {
-            if (camera->has_component<OrbitCameraControllerComponent>())
-            {
-                camera->remove_components<OrbitCameraControllerComponent>();
-                camera->add_component<FlyCameraControllerComponent>();
-                const auto camera_location = vec3(0.0f, 0.0f, -1.f *sqrtf(kNumCubes / 16) * 20.0f * half);
-                camera->set_location(camera_location);
-            }
-        }
-        else
-        {
-            if (camera->has_component<FlyCameraControllerComponent>())
-            {
-                camera->remove_components<FlyCameraControllerComponent>();
-                camera->add_component<OrbitCameraControllerComponent>();
-            }
-        }
         world.update(dt);
     }
-    
+
+    void add_or_update_camera_controller()
+    {
+        if (camera_controller_type == CameraControllerType::Fly &&
+            !camera->has_component<FlyCameraControllerComponent>())
+        {
+            camera->remove_components<OrbitCameraControllerComponent>();
+            camera->add_component<FlyCameraControllerComponent>();
+            // place a "camera" behind the cubes, the distance depends on the total number of cubes
+            camera->set_location(vec3(0.0f, 0.0f, -1.f * sqrtf(kNumCubes / 16) * 20.0f * half));
+        }
+        else if (camera_controller_type == CameraControllerType::Orbit &&
+                 !camera->has_component<OrbitCameraControllerComponent>())
+        {
+            camera->remove_components<FlyCameraControllerComponent>();
+            auto* obit = camera->add_component<OrbitCameraControllerComponent>();
+            obit->distance = 2.f;
+        }
+    }
+
     void render_ui() override
     {
         ImGui::Begin("Hello Camera", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
         ImGui::Text("FPS:    %.2f", fps_counter.get_fps());
         ImGui::Separator();
-        ImGui::RadioButton("Fly Camera", &camera_controller_type, 0); ImGui::SameLine();
-        ImGui::RadioButton("Orbit Camera", &camera_controller_type, 1);
+        ImGui::RadioButton("Fly Camera", (int*)&camera_controller_type, 0);
+        ImGui::SameLine();
+        ImGui::RadioButton("Orbit Camera", (int*)&camera_controller_type, 1);
+        add_or_update_camera_controller();
         ImGui::End();
     }
 
     void render() override
     {
         ZoneScoped;
-        
+
         auto* context = Device::get()->get_context();
         auto* imgui = Device::get()->get_imgui();
 

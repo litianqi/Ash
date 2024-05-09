@@ -100,7 +100,11 @@ void main() {
 
 constexpr uint32_t kNumBufferedFrames = 3;
 
-const auto CAMERA_REST_LOCATION = vec3(0.0f, 0.0f, -2.0f);
+enum class CameraControllerType : int
+{
+    Fly = 0,
+    Orbit = 1,
+};
 } // namespace
 
 namespace ash
@@ -114,7 +118,7 @@ class GltfApp : public BaseApp
     std::vector<GameObjectPtr> renderables;
     std::vector<UniformsPerObject> per_object;
     GameObjectPtr camera;
-    int camera_controller_type = 0; // 0: fly camera, 1: orbit camera
+    CameraControllerType camera_controller_type = CameraControllerType::Fly;
 
     uint32_t frame_index = 0;
 
@@ -202,7 +206,7 @@ class GltfApp : public BaseApp
                 .debugName = "Pipeline: mesh",
             },
             nullptr);
-        
+
         //> create world & load glTF into world
         world = std::make_unique<World>();
         auto load_model = [&](const fs::path& path) {
@@ -226,11 +230,11 @@ class GltfApp : public BaseApp
         assert(!renderables.empty());
 
         //> create camera
-        camera = world->create("Camera", CAMERA_REST_LOCATION);
+        camera = world->create("Camera", vec3(0.f));
         auto* camera_component = camera->add_component<CameraComponent>();
         camera_component->fov = 45.0f * (glm::pi<float>() / 180.0f);
         camera_component->aspect_ratio = (float)display_width / (float)display_height;
-        camera->add_component<FlyCameraControllerComponent>();
+        add_or_update_camera_controller();
 
         //> create a uniform buffers
         per_object.resize(renderables.size());
@@ -274,35 +278,36 @@ class GltfApp : public BaseApp
     {
         fps_counter.tick(dt);
         frame_index = (frame_index + 1) % kNumBufferedFrames;
-        if (camera_controller_type == 0)
-        {
-            if (camera->has_component<OrbitCameraControllerComponent>())
-            {
-                camera->remove_components<OrbitCameraControllerComponent>();
-                camera->add_component<FlyCameraControllerComponent>();
-                camera->set_location(CAMERA_REST_LOCATION);
-            }
-        }
-        else
-        {
-            if (camera->has_component<FlyCameraControllerComponent>())
-            {
-                camera->remove_components<FlyCameraControllerComponent>();
-                auto* obit = camera->add_component<OrbitCameraControllerComponent>();
-                obit->distance = 2.f;
-            }
-        }
         world->update(dt);
     }
-    
+
+    void add_or_update_camera_controller()
+    {
+        if (camera_controller_type == CameraControllerType::Fly &&
+            !camera->has_component<FlyCameraControllerComponent>())
+        {
+            camera->remove_components<OrbitCameraControllerComponent>();
+            camera->add_component<FlyCameraControllerComponent>();
+            camera->set_location(vec3(0.0f, 0.0f, -2.0f));
+        }
+        else if (camera_controller_type == CameraControllerType::Orbit &&
+                 !camera->has_component<OrbitCameraControllerComponent>())
+        {
+            camera->remove_components<FlyCameraControllerComponent>();
+            auto* obit = camera->add_component<OrbitCameraControllerComponent>();
+            obit->distance = 2.f;
+        }
+    }
+
     void render_ui() override
     {
         ImGui::Begin("Hello glTF", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
         ImGui::Text("FPS:    %.2f", fps_counter.get_fps());
         ImGui::Separator();
-        ImGui::RadioButton("Fly Camera", &camera_controller_type, 0);
+        ImGui::RadioButton("Fly Camera", (int*)&camera_controller_type, 0);
         ImGui::SameLine();
-        ImGui::RadioButton("Orbit Camera", &camera_controller_type, 1);
+        ImGui::RadioButton("Orbit Camera", (int*)&camera_controller_type, 1);
+        add_or_update_camera_controller();
         ImGui::End();
     }
 
