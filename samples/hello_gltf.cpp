@@ -202,7 +202,7 @@ class GltfApp : public BaseApp
                 .debugName = "Pipeline: mesh",
             },
             nullptr);
-
+        
         //> create world & load glTF into world
         world = std::make_unique<World>();
         auto load_model = [&](const fs::path& path) {
@@ -218,7 +218,7 @@ class GltfApp : public BaseApp
                 }
             }
         };
-        // load_model(get_resources_dir() / "BoxTextured/glTF-Binary/BoxTextured.glb");
+//         load_model(get_resources_dir() / "BoxTextured/glTF-Binary/BoxTextured.glb");
         // load_model(get_resources_dir() / "FlightHelmet/glTF/FlightHelmet.gltf");
         // load_model(get_resources_dir() / "DamagedHelmet/glTF-Binary/DamagedHelmet.glb");
         load_model(get_resources_dir() / "Sponza/glTF/Sponza.gltf");
@@ -293,6 +293,17 @@ class GltfApp : public BaseApp
         }
         world->update(dt);
     }
+    
+    void render_ui() override
+    {
+        ImGui::Begin("Hello glTF", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
+        ImGui::Text("FPS:    %.2f", fps_counter.get_fps());
+        ImGui::Separator();
+        ImGui::RadioButton("Fly Camera", &camera_controller_type, 0);
+        ImGui::SameLine();
+        ImGui::RadioButton("Orbit Camera", &camera_controller_type, 1);
+        ImGui::End();
+    }
 
     void render() override
     {
@@ -303,15 +314,6 @@ class GltfApp : public BaseApp
 
         lvk::TextureHandle swapchain_texture = context->getCurrentSwapchainTexture();
         framebuffer = {.color = {{.texture = swapchain_texture}}, .depthStencil = {.texture = depth_buffer}};
-
-        imgui->beginFrame(framebuffer);
-        ImGui::Begin("Hello glTF", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
-        ImGui::Text("FPS:    %.2f", fps_counter.get_fps());
-        ImGui::Separator();
-        ImGui::RadioButton("Fly Camera", &camera_controller_type, 0);
-        ImGui::SameLine();
-        ImGui::RadioButton("Orbit Camera", &camera_controller_type, 1);
-        ImGui::End();
 
         const auto* camera_component = camera->get_component<CameraComponent>();
         const UniformsPerFrame per_frame = {
@@ -367,7 +369,7 @@ class GltfApp : public BaseApp
             }
             buffer.cmdPopDebugGroupLabel();
         }
-        imgui->endFrame(buffer);
+        imgui->end_frame(buffer, framebuffer);
         buffer.cmdEndRendering();
 
         context->submit(buffer, swapchain_texture);

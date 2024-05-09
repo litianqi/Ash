@@ -40,7 +40,7 @@ class EditorApp : public BaseApp
                                            .clearColor = {0.0f, 0.0f, 0.0f, 1.0f},
                                        }}};
 
-        imgui->beginFrame(framebuffer);
+        imgui->begin_frame(framebuffer);
 
         ImGui::Begin("Statistics", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
         ImGui::Text("FPS:    %.2f", fps_counter.get_fps());
@@ -49,7 +49,7 @@ class EditorApp : public BaseApp
         lvk::ICommandBuffer& command_buffer = context->acquireCommandBuffer();
         
         command_buffer.cmdBeginRendering(render_pass, framebuffer);
-        imgui->endFrame(command_buffer);
+        imgui->end_frame(command_buffer, framebuffer);
         command_buffer.cmdEndRendering();
         
         context->submit(command_buffer, swapchain_texture);

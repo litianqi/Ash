@@ -11,7 +11,7 @@ bool init_vulkan_context_with_swapchain(std::unique_ptr<lvk::VulkanContext>& ctx
     using namespace lvk;
     HWDeviceDesc device;
     uint32_t num_devices = ctx->queryDevices(preferred_device_type, &device, 1);
-    
+
     if (!num_devices)
     {
         if (preferred_device_type == HWDeviceType_Discrete)
@@ -89,8 +89,9 @@ Device* Device::get()
 Device::Device(SDL_Window* window, uint32_t width, uint32_t height)
 {
     context = create_vulkan_context_with_swapchain(window, width, height, {});
-    imgui = std::make_unique<lvk::ImGuiRenderer>(*context);
-    
+    imgui = std::make_unique<ImGuiRenderer>(*context);
+    imgui->resize(width, height);
+
     const uint32_t pixel = 0xFFFFFFFF;
     white_texture = context->createTexture(
         {
@@ -111,12 +112,13 @@ Device::Device(SDL_Window* window, uint32_t width, uint32_t height)
             .debugName = "Sampler: linear",
         },
         nullptr);
-    
+
     material_buffer = std::make_unique<StorageBuffer>(context.get(), 12 * 1024 * 1024, "material buffer");
 }
 
 void Device::resize(uint32_t width, uint32_t height)
 {
     context->recreateSwapchain(static_cast<int>(width), static_cast<int>(height));
+    imgui->resize(width, height);
 }
 } // namespace ash

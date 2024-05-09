@@ -11,6 +11,7 @@ class EmptyApp : public BaseApp
     void startup() override
     {
         BaseApp::startup();
+        auto* context = Device::get()->get_context();
         spdlog::info("EmptyApp started!");
     }
     
@@ -23,6 +24,13 @@ class EmptyApp : public BaseApp
     void update(float dt) override
     {
         fps_counter.tick(dt);
+    }
+    
+    void render_ui() override
+    {
+        ImGui::Begin("Statistics", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
+        ImGui::Text("FPS:    %.2f", fps_counter.get_fps());
+        ImGui::End();
     }
 
     void render() override
@@ -42,16 +50,10 @@ class EmptyApp : public BaseApp
                            .clearColor = {0.0f, 0.0f, 0.0f, 1.0f},
                        }}};
 
-        imgui->beginFrame(framebuffer);
-
-        ImGui::Begin("Statistics", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
-        ImGui::Text("FPS:    %.2f", fps_counter.get_fps());
-        ImGui::End();
-        
         lvk::ICommandBuffer& command_buffer = context->acquireCommandBuffer();
         
         command_buffer.cmdBeginRendering(render_pass, framebuffer);
-        imgui->endFrame(command_buffer);
+        imgui->end_frame(command_buffer, framebuffer);
         command_buffer.cmdEndRendering();
         
         context->submit(command_buffer, swapchain_texture);

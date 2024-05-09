@@ -351,6 +351,16 @@ class CameraApp : public BaseApp
         }
         world.update(dt);
     }
+    
+    void render_ui() override
+    {
+        ImGui::Begin("Hello Camera", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
+        ImGui::Text("FPS:    %.2f", fps_counter.get_fps());
+        ImGui::Separator();
+        ImGui::RadioButton("Fly Camera", &camera_controller_type, 0); ImGui::SameLine();
+        ImGui::RadioButton("Orbit Camera", &camera_controller_type, 1);
+        ImGui::End();
+    }
 
     void render() override
     {
@@ -363,14 +373,6 @@ class CameraApp : public BaseApp
         framebuffer = {
             .color = {{.texture = swapchain_texture}},
         };
-
-        imgui->beginFrame(framebuffer);
-        ImGui::Begin("Hello Camera", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
-        ImGui::Text("FPS:    %.2f", fps_counter.get_fps());
-        ImGui::Separator();
-        ImGui::RadioButton("Fly Camera", &camera_controller_type, 0); ImGui::SameLine();
-        ImGui::RadioButton("Orbit Camera", &camera_controller_type, 1);
-        ImGui::End();
 
         const auto* camera_component = camera->get_component<CameraComponent>();
         const UniformsPerFrame per_frame = {
@@ -421,7 +423,7 @@ class CameraApp : public BaseApp
             }
             buffer.cmdPopDebugGroupLabel();
         }
-        imgui->endFrame(buffer);
+        imgui->end_frame(buffer, framebuffer);
         buffer.cmdEndRendering();
 
         context->submit(buffer, swapchain_texture);

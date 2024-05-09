@@ -286,7 +286,7 @@ class CubeApp : public BaseApp
                 .debugName = "Pipeline: mesh",
             },
             nullptr);
-
+        
         // initialize random rotation axes for all cubes
         for (auto& axis : axes)
         {
@@ -316,6 +316,13 @@ class CubeApp : public BaseApp
         fps_counter.tick(dt);
         frame_index = (frame_index + 1) % kNumBufferedFrames;
     }
+    
+    void render_ui() override
+    {
+        ImGui::Begin("Hello Cube", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
+        ImGui::Text("FPS:    %.2f", fps_counter.get_fps());
+        ImGui::End();
+    }
 
     void render() override
     {
@@ -328,11 +335,6 @@ class CubeApp : public BaseApp
         framebuffer = {
             .color = {{.texture = swapchain_texture}},
         };
-
-        imgui->beginFrame(framebuffer);
-        ImGui::Begin("Hello Cube", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
-        ImGui::Text("FPS:    %.2f", fps_counter.get_fps());
-        ImGui::End();
 
         const float fov = 45.0f * (glm::pi<float>() / 180.0f);
         const float aspect_ratio = (float)display_width / (float)display_height;
@@ -391,7 +393,7 @@ class CubeApp : public BaseApp
             }
             buffer.cmdPopDebugGroupLabel();
         }
-        imgui->endFrame(buffer);
+        imgui->end_frame(buffer, framebuffer);
         buffer.cmdEndRendering();
 
         context->submit(buffer, swapchain_texture);

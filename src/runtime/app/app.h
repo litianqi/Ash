@@ -36,6 +36,9 @@ class BaseApp
 
     // The render method will be invoked once per frame.
     virtual void render() = 0;
+    
+    // Optional UI (overlay) rendering pass.
+    virtual void render_ui() {}
 
     // The resize method will be invoked when the window is resized.
     virtual void resize(uint32_t width, uint32_t height);

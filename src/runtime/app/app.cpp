@@ -6,6 +6,7 @@
 #include "stb_image.h"
 #include "input/input_manager.h"
 #include "gfx/device.h"
+#include "imgui/backends/imgui_impl_sdl3.h"
 
 namespace ash
 {
@@ -69,6 +70,10 @@ void BaseApp::resize(uint32_t width, uint32_t height)
     display_width = width;
     display_height = height;
     get_subsystem<Device>()->resize(width, height);
+    ImGuiIO& io = ImGui::GetIO();
+    io.DisplaySize = ImVec2(width, height);
+    io.DisplayFramebufferScale = ImVec2(1.f, 1.f);
+    io.IniFilename = nullptr;
     spdlog::info("Resized to {} x {}", width, height);
 }
 
@@ -167,6 +172,7 @@ int run_application(BaseApp& app, int argc, char* argv[])
                 break;
             }
             }
+            // TODO: ImGui_ImplSDL3_ProcessEvent(&event);
         }
 
         uint64_t current_time = SDL_GetPerformanceCounter();
@@ -181,6 +187,10 @@ int run_application(BaseApp& app, int argc, char* argv[])
             std::this_thread::sleep_for(std::chrono::milliseconds(100));
             continue;
         }
+        
+        auto* imgui = Device::get()->get_imgui();
+        imgui->begin_frame();
+        app.render_ui(); // TODO: move to a standalone render pass
         app.render();
     }
 

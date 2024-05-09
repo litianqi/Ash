@@ -1,7 +1,7 @@
 #pragma once
 #include <vector>
 #include "LVK.h"
-#include "HelpersImGui.h"
+#include "imgui.h"
 #include "app/app_subsystem.h"
 #include "storage_buffer.h"
 
@@ -24,7 +24,7 @@ class Device : public AppSubsystem
     lvk::IContext* get_context() const { return context.get(); }
     
     // Gets the ImGui renderer.
-    lvk::ImGuiRenderer* get_imgui() const { return imgui.get(); }
+    ImGuiRenderer* get_imgui() const { return imgui.get(); }
     
     // Gets the white texture.
     lvk::TextureHandle get_white_texture() const { return white_texture; }
@@ -37,7 +37,7 @@ class Device : public AppSubsystem
 
   private:
     std::unique_ptr<lvk::IContext> context;
-    std::unique_ptr<lvk::ImGuiRenderer> imgui;
+    std::unique_ptr<ImGuiRenderer> imgui;
     lvk::Holder<lvk::TextureHandle> white_texture;
     lvk::Holder<lvk::SamplerHandle> linear_sampler;
     std::unique_ptr<StorageBuffer> material_buffer;
