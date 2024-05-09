@@ -270,9 +270,7 @@ std::optional<GltfModel> load_gltf(const fs::path& path, World& world)
         gpu_material.roughness_factor = material->roughness_factor;
         gpu_material.base_color_texture = material->base_color_texture->texture.index();
         gpu_material.metallic_roughness_texture = material->metallic_roughness_texture->texture.index();
-        auto gpu_data_offset = device->get_material_buffer()->allocate(gpu_material);
-
-        material->gpu_data_offset = gpu_data_offset;
+        material->uniform_buffer = device->get_persist_buffer()->alloc(gpu_material);
     }
 
     //> create a default material
@@ -282,8 +280,7 @@ std::optional<GltfModel> load_gltf(const fs::path& path, World& world)
     GpuMaterial gpu_material{};
     gpu_material.base_color_texture = default_material->base_color_texture->texture.index();
     gpu_material.metallic_roughness_texture = default_material->metallic_roughness_texture->texture.index();
-    auto gpu_data_offset = device->get_material_buffer()->allocate(gpu_material);
-    default_material->gpu_data_offset = gpu_data_offset;
+    default_material->uniform_buffer = device->get_persist_buffer()->alloc(gpu_material);
 
     //> load all meshes
     // use the same vectors for all meshes so that the memory doesnt reallocate as

@@ -28,6 +28,11 @@ class World
 
     // Update all game objects in the world.
     void update(float dt);
+    
+    auto& get_game_objects() const
+    {
+        return game_objects;
+    }
 
   private:
     stdext::slot_map<GameObject> game_objects;

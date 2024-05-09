@@ -335,8 +335,6 @@ class GltfApp : public BaseApp
         const lvk::Viewport viewport = {0.0f, 0.0f, (float)display_width, (float)display_height, 0.0f, +1.0f};
         const lvk::ScissorRect scissor = {0, 0, (uint32_t)display_width, (uint32_t)display_height};
 
-        auto material_gpu_address = ash::Device::get()->get_material_buffer()->get_gpu_address();
-
         // This will clear the framebuffer
         buffer.cmdBeginRendering(render_pass, framebuffer);
         {
@@ -361,7 +359,7 @@ class GltfApp : public BaseApp
                     } bindings = {
                         .per_frame = context->gpuAddress(ub_per_frame[frame_index]),
                         .per_object = context->gpuAddress(ub_per_object[frame_index], i * sizeof(UniformsPerObject)),
-                        .material = material_gpu_address + sub_mesh.material->gpu_data_offset.offset,
+                        .material = sub_mesh.material->uniform_buffer.get_gpu_address(),
                     };
                     buffer.cmdPushConstants(bindings);
                     buffer.cmdDrawIndexed(sub_mesh.index_count, 1, sub_mesh.index_offset);

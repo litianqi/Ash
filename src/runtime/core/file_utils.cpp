@@ -1,24 +1,12 @@
-#pragma once
-
-#include <vector>
-#include <algorithm>
-#include <string>
+#include "file_utils.h"
 #include <fstream>
-#include <filesystem>
-#include <variant>
-
-namespace fs = std::filesystem;
+#include <algorithm>
+#include <vector>
+#include "app/app.h"
 
 namespace ash
 {
-enum class FileError
-{
-    FILE_NOT_EXISTS,
-    FILE_CAN_NOT_OPEN,
-    FILE_UNKNOWN_ERROR
-};
-
-static inline std::variant<std::string, FileError> read_text_file(const fs::path& file_path)
+std::variant<std::string, FileError> read_text_file(const fs::path& file_path)
 {
     if (!fs::exists(file_path))
     {
@@ -39,4 +27,10 @@ static inline std::variant<std::string, FileError> read_text_file(const fs::path
         return FileError::FILE_UNKNOWN_ERROR;
     }
 }
+
+std::variant<std::string, FileError> read_shader(const fs::path& relative_file_path)
+{
+    auto file_path = BaseApp::get()->get_shaders_dir() / relative_file_path;
+    return read_text_file(file_path);
 }
+} // namespace ash

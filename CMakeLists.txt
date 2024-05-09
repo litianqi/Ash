@@ -123,8 +123,8 @@ function(setup_target_libs)
 endfunction()
 FetchContent_Declare(
         offsetAllocator
-        GIT_REPOSITORY  https://github.com/sebbbi/OffsetAllocator.git
-        GIT_TAG         3610a7377088b1e8c8f1525f458c96038a4e6fc0
+        GIT_REPOSITORY  https://github.com/litianqi/OffsetAllocator.git
+        GIT_TAG         97b8fb8f8b8be975efc98410ee58439f2a154254
         GIT_PROGRESS    TRUE
 )
 FetchContent_MakeAvailable(offsetAllocator)

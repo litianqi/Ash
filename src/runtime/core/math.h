@@ -24,6 +24,12 @@ constexpr vec3 DOWN_VECTOR = vec3(0.0, -1.0, 0.0);
 constexpr vec3 FORWARD_VECTOR = vec3(0.0, 0.0, 1.0);
 constexpr vec3 BACKWARD_VECTOR = vec3(0.0, 0.0, -1.0);
 
+struct Bounds {
+    vec3 origin;
+    float sphere_radius = 0.f;
+    vec3 extents;
+};
+
 static inline float float_reciprocal(const float& f, float epsilon = glm::epsilon<float>())
 {
     return glm::equal(f, 0.f, epsilon) ? 0.f : 1.f / f;

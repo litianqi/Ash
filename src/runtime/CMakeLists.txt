@@ -3,34 +3,48 @@ add_library(Ash
         app/app.cpp
         app/app.h
         app/app_subsystem.h
+        core/file_utils.h
+        core/file_utils.cpp
         core/fps_counter.h
         core/slot_map_ptr.h
-        core/file.h
         core/math.h
+        gfx/buffer_pool.cpp
+        gfx/buffer_pool.h
+        gfx/buffer_ring.cpp
+        gfx/buffer_ring.h
         gfx/device.cpp
         gfx/device.h
+        gfx/imgui.cpp
+        gfx/imgui.h
         input/input_manager.cpp
         input/input_manager.h
         input/input_types.h
-        world/world.cpp
-        world/world.h
-        world/game_object.cpp
-        world/game_object.h
-        world/components/camera_component.cpp
-        world/components/camera_component.h
-        world/components/camera_controller_component.cpp
-        world/components/camera_controller_component.h
-        world/component.h
+        renderer/passes/forward_pass.cpp
+        renderer/passes/forward_pass.h
+        renderer/renderers/forward_renderer.cpp
+        renderer/renderers/forward_renderer.h
+        renderer/render_list.h
+        renderer/render_object.h
+        renderer/render_types.h
+        renderer/renderer.cpp
+        renderer/renderer.h
         resource/resource.h
         resource/mesh_resource.h
         resource/material_resource.h
         resource/texture_resource.h
         resource/gltf_loader.cpp
         resource/gltf_loader.h
-        gfx/storage_buffer.cpp
-        gfx/storage_buffer.h
+        world/components/camera_component.cpp
+        world/components/camera_component.h
+        world/components/camera_controller_component.cpp
+        world/components/camera_controller_component.h
         world/components/mesh_component.cpp
         world/components/mesh_component.h
+        world/component.h
+        world/game_object.cpp
+        world/game_object.h
+        world/world.cpp
+        world/world.h
 )
 
 target_compile_definitions(Ash PUBLIC NOGDI) # disable wingdi.h

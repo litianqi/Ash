@@ -72,10 +72,17 @@ class BaseApp
     {
         return resources_dir;
     }
+    
+    // Gets the shaders directory.
+    fs::path get_shaders_dir() const
+    {
+        return shaders_dir;
+    }
 
   protected:
     fs::path root_dir;
     fs::path resources_dir;
+    fs::path shaders_dir;
     uint32_t display_width = 1920;
     uint32_t display_height = 1080;
     SDL_Window* window = nullptr;

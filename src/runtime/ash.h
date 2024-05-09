@@ -10,3 +10,4 @@
 #include "world/components/camera_controller_component.h"
 #include "world/components/mesh_component.h"
 #include "resource/gltf_loader.h"
+#include "renderer/renderers/forward_renderer.h"

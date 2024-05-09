@@ -86,7 +86,8 @@ Device* Device::get()
     return nullptr;
 }
 
-Device::Device(SDL_Window* window, uint32_t width, uint32_t height)
+Device::Device(SDL_Window* window, uint32_t width, uint32_t height, uint32_t persist_buffer_size)
+    : width(width), height(height)
 {
     context = create_vulkan_context_with_swapchain(window, width, height, {});
     imgui = std::make_unique<ImGuiRenderer>(*context);
@@ -113,7 +114,7 @@ Device::Device(SDL_Window* window, uint32_t width, uint32_t height)
         },
         nullptr);
 
-    material_buffer = std::make_unique<StorageBuffer>(context.get(), 12 * 1024 * 1024, "material buffer");
+    persist_buffer = std::make_unique<BufferPool>(context.get(), persist_buffer_size, "persist buffer");
 }
 
 void Device::resize(uint32_t width, uint32_t height)

@@ -15,18 +15,10 @@ struct Vertex {
 #endif
 };
 
-struct Bounds {
-    vec3 origin;
-    float sphere_radius;
-    vec3 extents;
-};
-
 struct SubMesh
 {
     uint32_t index_offset;
     uint32_t index_count;
-//    uint32_t vertex_offset;
-//    uint32_t vertex_count;
     MaterialPtr material;
     Bounds bounds;
 };

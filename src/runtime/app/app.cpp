@@ -24,13 +24,13 @@ void BaseApp::startup()
     minilog::initialize(nullptr, {.logLevelPrintToConsole = minilog::Warning, .threadNames = false});
 
     fs::path dir = fs::current_path();
-    const char* resources_dir_name = "resources";
-    while (dir != fs::current_path().root_path() && !exists(dir / fs::path(resources_dir_name)))
+    while (dir != fs::current_path().root_path() && !exists(dir / fs::path("resources")))
     {
         dir = dir.parent_path();
     }
     root_dir = dir;
-    resources_dir = dir / fs::path(resources_dir_name);
+    resources_dir = dir / fs::path("resources");
+    shaders_dir = dir / fs::path("shaders");
     spdlog::info("Root dir = {}", root_dir.string());
     spdlog::info("Resources dir = {}", resources_dir.string());
 

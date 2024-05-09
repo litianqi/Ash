@@ -1,6 +1,5 @@
 #include "game_object.h"
 #include "component.h"
-#include "core/file.h"
 #include "core/math.h"
 
 namespace ash

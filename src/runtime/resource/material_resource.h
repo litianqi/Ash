@@ -3,7 +3,7 @@
 #include "resource.h"
 #include "texture_resource.h"
 #include "core/math.h"
-#include "gfx/storage_buffer.h"
+#include "gfx/buffer_pool.h"
 
 namespace ash
 {
@@ -35,8 +35,7 @@ class MaterialResource : public Resource
     AlphaMode alpha_mode = AlphaMode::OPAQUE;
     float alpha_cutoff = 0.5f;
     bool double_sided = false;
-
-    OffsetAllocator::Allocation gpu_data_offset;
+    BufferSlice uniform_buffer;
 };
 
 using MaterialPtr = ResourcePtr<MaterialResource>;
