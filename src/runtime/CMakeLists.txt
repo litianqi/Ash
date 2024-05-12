@@ -38,6 +38,8 @@ add_library(Ash
         world/components/camera_component.h
         world/components/camera_controller_component.cpp
         world/components/camera_controller_component.h
+        world/components/light_component.h
+        world/components/light_component.cpp
         world/components/mesh_component.cpp
         world/components/mesh_component.h
         world/component.h

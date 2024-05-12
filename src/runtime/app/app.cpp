@@ -22,6 +22,10 @@ void BaseApp::startup()
     s_app = this;
 
     minilog::initialize(nullptr, {.logLevelPrintToConsole = minilog::Warning, .threadNames = false});
+    minilog::LogCallback callback;
+    callback.funcs[minilog::Warning] = [](void*, const char* msg) { spdlog::warn(msg); };
+    callback.funcs[minilog::FatalError] = [](void*, const char* msg) { spdlog::error(msg); };
+    minilog::callbackAdd(callback);
 
     fs::path dir = fs::current_path();
     while (dir != fs::current_path().root_path() && !exists(dir / fs::path("resources")))
@@ -75,6 +79,11 @@ void BaseApp::resize(uint32_t width, uint32_t height)
     io.DisplayFramebufferScale = ImVec2(1.f, 1.f);
     io.IniFilename = nullptr;
     spdlog::info("Resized to {} x {}", width, height);
+}
+
+float BaseApp::get_time_since_startup() const
+{
+    return SDL_GetTicks() * 0.001f;
 }
 
 int run_application(BaseApp& app, int argc, char* argv[])

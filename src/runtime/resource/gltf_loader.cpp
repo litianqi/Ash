@@ -270,6 +270,8 @@ std::optional<GltfModel> load_gltf(const fs::path& path, World& world)
         gpu_material.roughness_factor = material->roughness_factor;
         gpu_material.base_color_texture = material->base_color_texture->texture.index();
         gpu_material.metallic_roughness_texture = material->metallic_roughness_texture->texture.index();
+        gpu_material.alpha_mask = material->alpha_mode == AlphaMode::MASK ? 1 : 0;
+        gpu_material.alpha_cutoff = material->alpha_cutoff;
         material->uniform_buffer = device->get_persist_buffer()->alloc(gpu_material);
     }
 

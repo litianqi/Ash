@@ -4,6 +4,7 @@
 #include "world/components/mesh_component.h"
 #include "world/world.h"
 #include "world/components/camera_component.h"
+#include "world/components/light_component.h"
 
 namespace ash
 {
@@ -14,7 +15,7 @@ ForwardRenderer::ForwardRenderer(Device& device, const RendererDesc& desc) : Ren
 
 void ForwardRenderer::render(const World* world, const CameraComponent* camera)
 {
-    LVK_PROFILER_FUNCTION();
+    ZoneScoped;
 
     temp_buffer->advance();
 
@@ -22,31 +23,44 @@ void ForwardRenderer::render(const World* world, const CameraComponent* camera)
 
     RenderList opaque;
     RenderList transparent;
-    for (auto& go : world->get_game_objects())
+    std::vector<GpuLight> lights;
     {
-        if (go.has_component<MeshComponent>())
+        ZoneScopedN("Collect render objects");
+        for (auto& go : world->get_game_objects())
         {
-            auto& mesh = go.get_component<MeshComponent>()->mesh;
-            for (auto& sub_mesh : mesh->sub_meshes)
+            if (go.has_component<MeshComponent>())
             {
-
-                auto render_object = RenderObject{.vertex_buffer = mesh->vertex_buffer,
-                                                  .index_buffer = mesh->index_buffer,
-                                                  .index_offset = sub_mesh.index_offset,
-                                                  .index_count = sub_mesh.index_count,
-                                                  .bounds = sub_mesh.bounds,
-                                                  .material = sub_mesh.material->uniform_buffer.get_gpu_address(),
-                                                  .transform = go.get_matrix()};
-                if (sub_mesh.material->alpha_mode == AlphaMode::OPAQUE)
+                auto& mesh = go.get_component<MeshComponent>()->mesh;
+                for (auto& sub_mesh : mesh->sub_meshes)
                 {
-                    opaque.objects.push_back(render_object);
-                }
-                else
-                {
-                    transparent.objects.push_back(render_object);
+                    
+                    auto render_object = RenderObject{.vertex_buffer = mesh->vertex_buffer,
+                                                      .index_buffer = mesh->index_buffer,
+                                                      .index_offset = sub_mesh.index_offset,
+                                                      .index_count = sub_mesh.index_count,
+                                                      .bounds = sub_mesh.bounds,
+                                                      .material = sub_mesh.material->uniform_buffer.get_gpu_address(),
+                                                      .transform = go.get_matrix()};
+                    if (sub_mesh.material->alpha_mode == AlphaMode::BLEND)
+                    {
+                        transparent.objects.push_back(render_object);
+                    }
+                    else // OPAQUE && MASK
+                    {
+                        opaque.objects.push_back(render_object);
+                    }
                 }
             }
+            if (go.has_component<LightComponent>())
+            {
+                lights.push_back(go.get_component<LightComponent>()->get_gpu_light());
+            }
         }
+    }
+    {
+        ZoneScopedN("Sort render objects");
+        opaque.sort(&RenderList::opaque_sort);
+        // TODO: sort transparent
     }
 
     auto* context = Device::get()->get_context();
@@ -78,8 +92,10 @@ void ForwardRenderer::render(const World* world, const CameraComponent* camera)
             .proj = camera->get_projection_matrix(),
             .view = camera->get_view_matrix(),
             .sampler = sampler,
+            .shader_type = shader_type,
             .opaque = opaque,
             .transparent = transparent,
+            .lights = lights,
         };
         forward_pass->render(pass_context, pass_data);
         auto* imgui = Device::get()->get_imgui();

@@ -27,6 +27,10 @@ void World::destroy(GameObjectPtr ptr)
 {
     if (ptr)
     {
+        for (auto& child : ptr->children)
+        {
+            destroy(child);
+        }
         ptr->on_destroy();
         auto key = ptr.get_key();
         game_objects.erase(key);
