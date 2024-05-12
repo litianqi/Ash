@@ -10,6 +10,31 @@
 
 namespace ash
 {
+// We use the flip_x function to convert from glTF's right-handed coordinate system to our left-handed one.
+// see core/math.h
+// see https://registry.khronos.org/glTF/specs/2.0/glTF-2.0.html#coordinate-system-and-units
+glm::vec3 flip_x(const glm::vec3& v)
+{
+    return {-v.x, v.y, v.z};
+}
+
+glm::quat flip_x(const glm::quat& r)
+{
+    // see https://gamedev.stackexchange.com/questions/201977/how-to-change-quaternion-when-flipping-x-axis
+    return {r.w, r.x, -r.y, -r.z};
+}
+
+glm::mat4 flip_x(const glm::mat4& m)
+{
+    glm::vec3 translation;
+    glm::quat rotation;
+    glm::vec3 scale;
+    mat4_decompose(m, scale, rotation, translation);
+    translation = flip_x(translation);
+    rotation = flip_x(rotation);
+    return mat4_compose(scale, rotation, translation);
+}
+
 TexturePtr load_texture(lvk::IContext* context, const fs::path& base_dir, fastgltf::Asset& asset,
                         fastgltf::Image& image)
 {
@@ -324,7 +349,7 @@ std::optional<GltfModel> load_gltf(const fs::path& path, World& world)
 
                 fastgltf::iterateAccessorWithIndex<glm::vec3>(gltf, posAccessor, [&](glm::vec3 v, size_t index) {
                     Vertex vertex{};
-                    vertex.position = v;
+                    vertex.position = flip_x(v);
                     vertex.normal = {1, 0, 0};
                     vertex.uv = {0, 0};
 #if ASH_LOAD_VERTEX_COLORS
@@ -341,7 +366,7 @@ std::optional<GltfModel> load_gltf(const fs::path& path, World& world)
 
                 fastgltf::iterateAccessorWithIndex<glm::vec3>(
                     gltf, gltf.accessors[(*normals).second],
-                    [&](glm::vec3 v, size_t index) { vertices[initial_vtx + index].normal = v; });
+                    [&](glm::vec3 v, size_t index) { vertices[initial_vtx + index].normal = flip_x(v); });
             }
 
             // load UVs
@@ -419,7 +444,7 @@ std::optional<GltfModel> load_gltf(const fs::path& path, World& world)
 
         std::visit(fastgltf::visitor{[&](fastgltf::Node::TransformMatrix gltf_matrix) {
                                          glm::mat4 matrix = glm::make_mat4(gltf_matrix.data());
-                                         game_object->set_local_matrix(matrix);
+                                         game_object->set_local_matrix(flip_x(matrix));
                                      },
                                      [&](fastgltf::TRS transform) {
                                          glm::vec3 translation(transform.translation[0], transform.translation[1],
@@ -427,7 +452,8 @@ std::optional<GltfModel> load_gltf(const fs::path& path, World& world)
                                          glm::quat rotation(transform.rotation[3], transform.rotation[0],
                                                             transform.rotation[1], transform.rotation[2]);
                                          glm::vec3 scale(transform.scale[0], transform.scale[1], transform.scale[2]);
-                                         game_object->set_local_matrix(mat4_compose(scale, rotation, translation));
+                                         game_object->set_local_matrix(
+                                             mat4_compose(scale, flip_x(rotation), flip_x(translation)));
                                      }},
                    gltf_node.transform);
     }

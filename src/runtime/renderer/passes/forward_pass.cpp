@@ -90,7 +90,7 @@ ForwardPass::ForwardPass(lvk::IContext& context)
                     },
                 .depthFormat = Renderer::DEPTH_FORMAT,
                 .cullMode = lvk::CullMode_Back,
-                .frontFaceWinding = lvk::WindingMode_CW,
+                .frontFaceWinding = lvk::WindingMode_CCW,
                 .debugName = "Pipeline: mesh",
             },
             nullptr);
@@ -112,7 +112,7 @@ ForwardPass::ForwardPass(lvk::IContext& context)
                     },
                 .depthFormat = Renderer::DEPTH_FORMAT,
                 .cullMode = lvk::CullMode_Back,
-                .frontFaceWinding = lvk::WindingMode_CW,
+                .frontFaceWinding = lvk::WindingMode_CCW,
                 .debugName = "Pipeline: mesh",
             },
             nullptr);
