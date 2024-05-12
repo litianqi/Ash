@@ -148,7 +148,7 @@ class RendererApp : public BaseApp
             ImGui::RadioButton("Unlit", (int*)&shader_type, 0);
             renderer->set_shader_type(shader_type);
             
-            ImGui::SliderAngle("Sun Pitch", &sun_euler.x, -180.f, 180.f);
+            ImGui::SliderAngle("Sun Pitch", &sun_euler.x, 0.f, 90.f);
             ImGui::SliderAngle("Sun Yaw", &sun_euler.y, -180.f, 180.f);
             sun->set_rotation(quat(sun_euler));
         }
