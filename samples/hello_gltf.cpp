@@ -43,9 +43,23 @@ class GltfApp : public BaseApp
     lvk::DepthState depth_state;
     
     std::vector<GameObjectPtr> gltf_objects;
-    const char* gltf_names[4] = { "BoxTextured", "FlightHelmet", "DamagedHelmet", "Sponza" };
-    const char* gltf_paths[4] = { "BoxTextured/glTF-Binary/BoxTextured.glb", "FlightHelmet/glTF/FlightHelmet.gltf", "DamagedHelmet/glTF-Binary/DamagedHelmet.glb", "Sponza/glTF/Sponza.gltf" };
-    int gltf_idx = 3;
+    std::vector<std::string> gltf_names;
+    std::vector<fs::path> gltf_paths;
+    int gltf_idx = 0;
+    
+    void list_gltf_files()
+    {
+        for (fs::recursive_directory_iterator i(get_resources_dir()), end; i != end; ++i)
+        {
+            if (!fs::is_directory(i->path()) && (i->path().extension() == ".gltf" || i->path().extension() == ".glb"))
+            {
+                auto file_name = i->path().filename().string();
+                size_t dot_index = file_name.find_last_of('.'); 
+                gltf_names.push_back(file_name.substr(0, dot_index));
+                gltf_paths.push_back(i->path());
+            }
+        }
+    }
     
     void load_gltf(const fs::path& path)
     {
@@ -56,7 +70,7 @@ class GltfApp : public BaseApp
         gltf_objects.clear();
         renderables.clear();
         
-        auto gltf = ash::load_gltf(get_resources_dir() / path, *world);
+        auto gltf = ash::load_gltf(path, *world);
         gltf_objects = gltf->game_objects;
         for (auto& go : gltf_objects)
         {
@@ -158,6 +172,9 @@ class GltfApp : public BaseApp
 
         //> create world & load glTF into world
         world = std::make_unique<World>();
+        list_gltf_files();
+        auto it = std::find(gltf_names.begin(), gltf_names.end(), "Sponza");
+        gltf_idx = it == gltf_names.end() ? 0 : (int)std::distance(gltf_names.begin(), it);
         load_gltf(gltf_paths[gltf_idx]);
 
         //> create camera
@@ -234,13 +251,13 @@ class GltfApp : public BaseApp
         ImGui::Text("FPS:    %.2f", fps_counter.get_fps());
         ImGui::Separator();
         
-        const char* combo_preview_value = gltf_names[gltf_idx];
+        const char* combo_preview_value = gltf_names[gltf_idx].c_str();
         if (ImGui::BeginCombo("glTF", combo_preview_value))
         {
-            for (int i = 0; i < IM_ARRAYSIZE(gltf_names); i++)
+            for (int i = 0; i < gltf_names.size(); i++)
             {
                 const bool is_selected = (gltf_idx == i);
-                if (ImGui::Selectable(gltf_names[i], is_selected))
+                if (ImGui::Selectable(gltf_names[i].c_str(), is_selected))
                 {
                     if (gltf_idx != i)
                     {

@@ -30,9 +30,23 @@ class RendererApp : public BaseApp
     ShaderType shader_type = ShaderType::SIMPLE_LIT;
 
     std::vector<GameObjectPtr> gltf_objects;
-    const char* gltf_names[5] = { "BoxTextured", "FlightHelmet", "DamagedHelmet", "Sponza", "Bistro" };
-    const char* gltf_paths[5] = { "BoxTextured/glTF-Binary/BoxTextured.glb", "FlightHelmet/glTF/FlightHelmet.gltf", "DamagedHelmet/glTF-Binary/DamagedHelmet.glb", "Sponza/glTF/Sponza.gltf", "Bistro_Godot.glb" };
-    int gltf_idx = 3;
+    std::vector<std::string> gltf_names;
+    std::vector<fs::path> gltf_paths;
+    int gltf_idx = 0;
+
+    void list_gltf_files()
+    {
+        for (fs::recursive_directory_iterator i(get_resources_dir()), end; i != end; ++i)
+        {
+            if (!fs::is_directory(i->path()) && (i->path().extension() == ".gltf" || i->path().extension() == ".glb"))
+            {
+                auto file_name = i->path().filename().string();
+                size_t dot_index = file_name.find_last_of('.'); 
+                gltf_names.push_back(file_name.substr(0, dot_index));
+                gltf_paths.push_back(i->path());
+            }
+        }
+    }
 
     void load_gltf(const fs::path& path)
     {
@@ -41,8 +55,8 @@ class RendererApp : public BaseApp
             world->destroy(obj);
         }
         gltf_objects.clear();
-        
-        auto gltf = ash::load_gltf(get_resources_dir() / path, *world);
+
+        auto gltf = ash::load_gltf(path, *world);
         gltf_objects = gltf->game_objects;
     }
 
@@ -53,6 +67,9 @@ class RendererApp : public BaseApp
 
         //> create world & load glTF into world
         world = std::make_unique<World>();
+        list_gltf_files();
+        auto it = std::find(gltf_names.begin(), gltf_names.end(), "Sponza");
+        gltf_idx = it == gltf_names.end() ? 0 : (int)std::distance(gltf_names.begin(), it);
         load_gltf(gltf_paths[gltf_idx]);
 
         //> create camera
@@ -61,7 +78,7 @@ class RendererApp : public BaseApp
         camera_component->fov = 45.0f * (glm::pi<float>() / 180.0f);
         camera_component->aspect_ratio = (float)display_width / (float)display_height;
         add_or_update_camera_controller();
-        
+
         //> create sun
         sun = world->create("Sun", vec3(0.f, 10.f, 0.f));
         auto* light_component = sun->add_component<DirectionalLightComponent>();
@@ -89,9 +106,9 @@ class RendererApp : public BaseApp
     {
         fps_counter.tick(dt);
         world->update(dt);
-//        sun->set_rotation(quat(vec3(glm::pi<float>() * 0.25f, get_time_since_startup(), 0.f)));
+        //        sun->set_rotation(quat(vec3(glm::pi<float>() * 0.25f, get_time_since_startup(), 0.f)));
     }
-    
+
     void add_or_update_camera_controller()
     {
         if (camera_controller_type == CameraControllerType::Fly &&
@@ -99,7 +116,7 @@ class RendererApp : public BaseApp
         {
             camera->remove_components<OrbitCameraControllerComponent>();
             auto* fly = camera->add_component<FlyCameraControllerComponent>();
-            //camera->set_location(vec3(0.0f, 0.0f, -2.0f));
+            // camera->set_location(vec3(0.0f, 0.0f, -2.0f));
             camera->set_location(vec3(-10, 0, 0));
             fly->pitch = glm::radians(-10.f);
             fly->yaw = glm::radians(90.f);
@@ -112,21 +129,21 @@ class RendererApp : public BaseApp
             obit->distance = 2.f;
         }
     }
-    
+
     void render_ui() override
     {
         ImGui::Begin("Hello Renderer", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
         {
             ImGui::Text("FPS:    %.2f", fps_counter.get_fps());
             ImGui::Separator();
-            
-            const char* combo_preview_value = gltf_names[gltf_idx];
+
+            const char* combo_preview_value = gltf_names[gltf_idx].c_str();
             if (ImGui::BeginCombo("glTF", combo_preview_value))
             {
-                for (int i = 0; i < IM_ARRAYSIZE(gltf_names); i++)
+                for (int i = 0; i < gltf_names.size(); i++)
                 {
                     const bool is_selected = (gltf_idx == i);
-                    if (ImGui::Selectable(gltf_names[i], is_selected))
+                    if (ImGui::Selectable(gltf_names[i].c_str(), is_selected))
                     {
                         if (gltf_idx != i)
                         {
@@ -137,17 +154,17 @@ class RendererApp : public BaseApp
                 }
                 ImGui::EndCombo();
             }
-            
+
             ImGui::RadioButton("Fly Camera", (int*)&camera_controller_type, 0);
             ImGui::SameLine();
             ImGui::RadioButton("Orbit Camera", (int*)&camera_controller_type, 1);
             add_or_update_camera_controller();
-        
+
             ImGui::RadioButton("Simple Lit", (int*)&shader_type, 1);
             ImGui::SameLine();
             ImGui::RadioButton("Unlit", (int*)&shader_type, 0);
             renderer->set_shader_type(shader_type);
-            
+
             ImGui::SliderAngle("Sun Pitch", &sun_euler.x, 0.f, 90.f);
             ImGui::SliderAngle("Sun Yaw", &sun_euler.y, -180.f, 180.f);
             sun->set_rotation(quat(sun_euler));
