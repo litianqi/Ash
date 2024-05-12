@@ -68,6 +68,10 @@ void GameObject::on_destroy()
         delete component;
     }
     components.clear();
+    if (parent)
+    {
+        parent->remove_child(self);
+    }
 }
 
 void GameObject::remove_components(const std::type_info& type)

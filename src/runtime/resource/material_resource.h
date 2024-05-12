@@ -10,10 +10,13 @@ namespace ash
 struct alignas(16) GpuMaterial
 {
     alignas(16) vec4 base_color_factor = {0.0f, 0.0f, 0.0f, 0.0f};
-    alignas(4) float metallic_factor = 0.0f;
-    alignas(4) float roughness_factor = 0.0f;
-    alignas(4) uint32_t base_color_texture = 0;
-    alignas(4) uint32_t metallic_roughness_texture = 0;
+    float metallic_factor = 0.0f;
+    float roughness_factor = 0.0f;
+    uint32_t base_color_texture = 0;
+    uint32_t metallic_roughness_texture = 0;
+    uint32_t alpha_mask = 0;
+    float alpha_cutoff = 0.0f;
+//    float _padding[2];
 };
 
 // How the alpha value of the main factor and texture should be interpreted

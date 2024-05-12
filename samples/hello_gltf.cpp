@@ -6,98 +6,8 @@
 // #include "SDL_timer.h"
 // #include "imgui/imgui_demo.cpp"
 
-namespace // types, constants and helper functions
+namespace
 {
-struct UniformsPerFrame
-{
-    mat4 proj;
-    mat4 view;
-    uint32_t sampler;
-};
-struct UniformsPerObject
-{
-    mat4 model;
-};
-
-const char* code_vs = R"(
-layout (location=0) in vec3 pos;
-layout (location=1) in vec3 normal;
-layout (location=2) in vec2 uv;
-layout (location=0) out vec3 out_normal;
-layout (location=1) out vec2 out_uv;
-
-layout(std430, buffer_reference) readonly buffer PerFrame {
-  mat4 proj;
-  mat4 view;
-  uint sampler0;
-};
-
-layout(std430, buffer_reference) readonly buffer PerObject {
-  mat4 model;
-};
-
-layout(std430, buffer_reference) readonly buffer Material {
-  vec4 base_color_factor;
-  float metallic_factor;
-  float roughness_factor;
-  uint base_color_texture;
-  uint metallic_roughness_texture;
-};
-
-layout(push_constant) uniform constants {
-	PerFrame per_frame;
-	PerObject per_object;
-    Material material;
-} pc;
-
-void main() {
-  mat4 proj = pc.per_frame.proj;
-  mat4 view = pc.per_frame.view;
-  mat4 model = pc.per_object.model;
-  gl_Position = proj * view * model * vec4(pos, 1.0);
-
-  // Compute the normal in world-space
-  mat3 norm_matrix = transpose(inverse(mat3(model)));
-  out_normal = normalize(norm_matrix * normal);
-  out_uv = uv;
-}
-)";
-
-const char* code_fs = R"(
-layout (location=0) in vec3 normal;
-layout (location=1) in vec2 uv;
-layout (location=0) out vec4 out_FragColor;
-
-layout(std430, buffer_reference) readonly buffer PerFrame {
-  mat4 proj;
-  mat4 view;
-  uint sampler0;
-};
-
-layout(std430, buffer_reference) readonly buffer PerObject {
-  mat4 model;
-};
-
-layout(std430, buffer_reference) readonly buffer Material {
-  vec4 base_color_factor;
-  float metallic_factor;
-  float roughness_factor;
-  uint base_color_texture;
-  uint metallic_roughness_texture;
-};
-
-layout(push_constant) uniform constants {
-	PerFrame per_frame;
-    PerObject per_object;
-    Material material;
-} pc;
-
-void main() {
-  vec4 base_color = textureBindless2D(pc.material.base_color_texture, pc.per_frame.sampler0, uv);
-  out_FragColor = base_color;
-};
-)";
-
 constexpr uint32_t kNumBufferedFrames = 3;
 
 enum class CameraControllerType : int
@@ -116,7 +26,7 @@ class GltfApp : public BaseApp
 
     std::unique_ptr<World> world;
     std::vector<GameObjectPtr> renderables;
-    std::vector<UniformsPerObject> per_object;
+    std::vector<ObjectUniforms> per_object;
     GameObjectPtr camera;
     CameraControllerType camera_controller_type = CameraControllerType::Fly;
 
@@ -131,6 +41,42 @@ class GltfApp : public BaseApp
     lvk::Holder<lvk::SamplerHandle> sampler;
     lvk::RenderPass render_pass;
     lvk::DepthState depth_state;
+    
+    std::vector<GameObjectPtr> gltf_objects;
+    const char* gltf_names[4] = { "BoxTextured", "FlightHelmet", "DamagedHelmet", "Sponza" };
+    const char* gltf_paths[4] = { "BoxTextured/glTF-Binary/BoxTextured.glb", "FlightHelmet/glTF/FlightHelmet.gltf", "DamagedHelmet/glTF-Binary/DamagedHelmet.glb", "Sponza/glTF/Sponza.gltf" };
+    int gltf_idx = 3;
+    
+    void load_gltf(const fs::path& path)
+    {
+        for (auto& obj : gltf_objects)
+        {
+            world->destroy(obj);
+        }
+        gltf_objects.clear();
+        renderables.clear();
+        
+        auto gltf = ash::load_gltf(get_resources_dir() / path, *world);
+        gltf_objects = gltf->game_objects;
+        for (auto& go : gltf_objects)
+        {
+            if (go->has_component<MeshComponent>())
+            {
+                renderables.push_back(go);
+            }
+        }
+        per_object.resize(renderables.size());
+        ub_per_object.clear();
+        auto* context = Device::get()->get_context();
+        for (uint32_t i = 0; i != kNumBufferedFrames; i++)
+        {
+            ub_per_object.push_back(context->createBuffer({.usage = lvk::BufferUsageBits_Uniform,
+                                                           .storage = lvk::StorageType_HostVisible,
+                                                           .size = renderables.size() * sizeof(ObjectUniforms),
+                                                           .debugName = "Buffer: uniforms (per object)"},
+                                                          nullptr));
+        }
+    }
 
     void create_depth_buffer()
     {
@@ -178,8 +124,11 @@ class GltfApp : public BaseApp
                        }},
                        .depth = {.loadOp = lvk::LoadOp_Clear, .storeOp = lvk::StoreOp_Store, .clearDepth = 1.0}};
 
-        vert = context->createShaderModule({code_vs, lvk::Stage_Vert, "Shader Module: main (vert)"});
-        frag = context->createShaderModule({code_fs, lvk::Stage_Frag, "Shader Module: main (frag)"});
+        auto code_vs = std::get<0>(read_shader("mesh/unlit.vert"));
+        auto code_fs = std::get<0>(read_shader("mesh/unlit.frag"));
+
+        vert = context->createShaderModule({code_vs.c_str(), lvk::Stage_Vert, "Shader Module: main (vert)"});
+        frag = context->createShaderModule({code_fs.c_str(), lvk::Stage_Frag, "Shader Module: main (frag)"});
 
         const lvk::VertexInput vdesc = {
             .attributes =
@@ -209,25 +158,7 @@ class GltfApp : public BaseApp
 
         //> create world & load glTF into world
         world = std::make_unique<World>();
-        auto load_model = [&](const fs::path& path) {
-            auto model = load_gltf(path, *world);
-            if (model.has_value())
-            {
-                for (auto& go : model->game_objects)
-                {
-                    if (go->has_component<MeshComponent>())
-                    {
-                        renderables.push_back(go);
-                    }
-                }
-            }
-        };
-        // load_model(get_resources_dir() / "BoxTextured/glTF-Binary/BoxTextured.glb");
-        // load_model(get_resources_dir() / "FlightHelmet/glTF/FlightHelmet.gltf");
-        // load_model(get_resources_dir() / "DamagedHelmet/glTF-Binary/DamagedHelmet.glb");
-        // load_gltf(get_resources_dir() / "Bistro_Godot.glb", *world);
-        load_model(get_resources_dir() / "Sponza/glTF/Sponza.gltf");
-        assert(!renderables.empty());
+        load_gltf(gltf_paths[gltf_idx]);
 
         //> create camera
         camera = world->create("Camera", vec3(0.f));
@@ -237,19 +168,13 @@ class GltfApp : public BaseApp
         add_or_update_camera_controller();
 
         //> create a uniform buffers
-        per_object.resize(renderables.size());
         for (uint32_t i = 0; i != kNumBufferedFrames; i++)
         {
             ub_per_frame.push_back(context->createBuffer({.usage = lvk::BufferUsageBits_Uniform,
                                                           .storage = lvk::StorageType_HostVisible,
-                                                          .size = sizeof(UniformsPerFrame),
+                                                          .size = sizeof(GlobalUniforms),
                                                           .debugName = "Buffer: uniforms (per frame)"},
                                                          nullptr));
-            ub_per_object.push_back(context->createBuffer({.usage = lvk::BufferUsageBits_Uniform,
-                                                           .storage = lvk::StorageType_HostVisible,
-                                                           .size = renderables.size() * sizeof(UniformsPerObject),
-                                                           .debugName = "Buffer: uniforms (per object)"},
-                                                          nullptr));
         }
     }
 
@@ -287,8 +212,11 @@ class GltfApp : public BaseApp
             !camera->has_component<FlyCameraControllerComponent>())
         {
             camera->remove_components<OrbitCameraControllerComponent>();
-            camera->add_component<FlyCameraControllerComponent>();
-            camera->set_location(vec3(0.0f, 0.0f, -2.0f));
+            auto* fly = camera->add_component<FlyCameraControllerComponent>();
+            //camera->set_location(vec3(0.0f, 0.0f, -2.0f));
+            camera->set_location(vec3(-10, 1, -1));
+            fly->pitch = glm::radians(-10.f);
+            fly->yaw = glm::radians(80.f);
         }
         else if (camera_controller_type == CameraControllerType::Orbit &&
                  !camera->has_component<OrbitCameraControllerComponent>())
@@ -302,12 +230,33 @@ class GltfApp : public BaseApp
     void render_ui() override
     {
         ImGui::Begin("Hello glTF", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
+        
         ImGui::Text("FPS:    %.2f", fps_counter.get_fps());
         ImGui::Separator();
+        
+        const char* combo_preview_value = gltf_names[gltf_idx];
+        if (ImGui::BeginCombo("glTF", combo_preview_value))
+        {
+            for (int i = 0; i < IM_ARRAYSIZE(gltf_names); i++)
+            {
+                const bool is_selected = (gltf_idx == i);
+                if (ImGui::Selectable(gltf_names[i], is_selected))
+                {
+                    if (gltf_idx != i)
+                    {
+                        gltf_idx = i;
+                        load_gltf(gltf_paths[i]);
+                    }
+                }
+            }
+            ImGui::EndCombo();
+        }
+
         ImGui::RadioButton("Fly Camera", (int*)&camera_controller_type, 0);
         ImGui::SameLine();
         ImGui::RadioButton("Orbit Camera", (int*)&camera_controller_type, 1);
         add_or_update_camera_controller();
+        
         ImGui::End();
     }
 
@@ -322,7 +271,7 @@ class GltfApp : public BaseApp
         framebuffer = {.color = {{.texture = swapchain_texture}}, .depthStencil = {.texture = depth_buffer}};
 
         const auto* camera_component = camera->get_component<CameraComponent>();
-        const UniformsPerFrame per_frame = {
+        const GlobalUniforms per_frame = {
             .proj = camera_component->get_projection_matrix(),
             .view = camera_component->get_view_matrix(),
             .sampler = sampler.index(),
@@ -333,7 +282,7 @@ class GltfApp : public BaseApp
         {
             per_object[i].model = renderables[i]->get_matrix();
         }
-        context->upload(ub_per_object[frame_index], per_object.data(), per_object.size() * sizeof(UniformsPerObject));
+        context->upload(ub_per_object[frame_index], per_object.data(), per_object.size() * sizeof(ObjectUniforms));
 
         // Command buffers (1-N per thread): create, submit and forget
         lvk::ICommandBuffer& buffer = context->acquireCommandBuffer();
@@ -364,7 +313,7 @@ class GltfApp : public BaseApp
                         uint64_t material;
                     } bindings = {
                         .per_frame = context->gpuAddress(ub_per_frame[frame_index]),
-                        .per_object = context->gpuAddress(ub_per_object[frame_index], i * sizeof(UniformsPerObject)),
+                        .per_object = context->gpuAddress(ub_per_object[frame_index], i * sizeof(ObjectUniforms)),
                         .material = sub_mesh.material->uniform_buffer.get_gpu_address(),
                     };
                     buffer.cmdPushConstants(bindings);

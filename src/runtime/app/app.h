@@ -78,6 +78,8 @@ class BaseApp
     {
         return shaders_dir;
     }
+    
+    float get_time_since_startup() const;
 
   protected:
     fs::path root_dir;

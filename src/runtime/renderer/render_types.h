@@ -23,15 +23,41 @@ struct RenderPassContext
     }
 };
 
-struct LightInstance
+struct alignas(16) GpuLight
 {
     vec3 position;
-    float type;
+    uint32_t type; // 0: directional, 1: point, 2: spot
     vec3 color;
     float intensity;
     vec3 direction;
     float range;
     float inner_cone_angle;
     float outer_cone_angle;
+    float _pad[2];
+};
+
+constexpr uint32_t MAX_LIGHT_COUNT = 16u;
+
+struct alignas(16) GlobalUniforms
+{
+    mat4 proj;
+    mat4 view;
+    uint32_t sampler;
+    uint32_t padding[3];
+    vec3 ambient_light;
+    uint32_t lights_num;
+    ash::GpuLight lights[MAX_LIGHT_COUNT];
+};
+
+struct ObjectUniforms
+{
+    mat4 model;
+};
+
+struct alignas(16) PushConstants
+{
+    uint64_t per_frame = 0;
+    uint64_t per_object = 0;
+    uint64_t material = 0;
 };
 }
