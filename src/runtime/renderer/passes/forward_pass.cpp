@@ -48,9 +48,9 @@ ForwardPass::ForwardPass(lvk::IContext& context)
                         {
                             .format = context.getSwapchainFormat(),
                             .blendEnabled = true,
-                            .srcRGBBlendFactor = lvk::BlendFactor_One,
+                            .srcRGBBlendFactor = lvk::BlendFactor_SrcAlpha,
                             .srcAlphaBlendFactor = lvk::BlendFactor_One,
-                            .dstRGBBlendFactor = lvk::BlendFactor_DstAlpha,
+                            .dstRGBBlendFactor = lvk::BlendFactor_OneMinusSrcAlpha,
                             .dstAlphaBlendFactor = lvk::BlendFactor_Zero,
                         },
                     },
@@ -104,9 +104,9 @@ ForwardPass::ForwardPass(lvk::IContext& context)
                         {
                             .format = context.getSwapchainFormat(),
                             .blendEnabled = true,
-                            .srcRGBBlendFactor = lvk::BlendFactor_One,
+                            .srcRGBBlendFactor = lvk::BlendFactor_SrcAlpha,
                             .srcAlphaBlendFactor = lvk::BlendFactor_One,
-                            .dstRGBBlendFactor = lvk::BlendFactor_DstAlpha,
+                            .dstRGBBlendFactor = lvk::BlendFactor_OneMinusSrcAlpha,
                             .dstAlphaBlendFactor = lvk::BlendFactor_Zero,
                         },
                     },
