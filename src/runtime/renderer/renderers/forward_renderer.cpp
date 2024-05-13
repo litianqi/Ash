@@ -25,7 +25,7 @@ void ForwardRenderer::render(const World* world, const CameraComponent* camera)
     RenderList transparent;
     std::vector<GpuLight> lights;
     {
-        ZoneScopedN("Collect render objects");
+        ZoneScopedN("Collect Render Objects");
         for (auto& go : world->get_game_objects())
         {
             if (go.has_component<MeshComponent>())
@@ -58,9 +58,10 @@ void ForwardRenderer::render(const World* world, const CameraComponent* camera)
         }
     }
     {
-        ZoneScopedN("Sort render objects");
-        opaque.sort(&RenderList::opaque_sort);
-        // TODO: sort transparent
+        ZoneScopedN("Sort Render Objects");
+        opaque.sort(OpaqueSorter());
+        auto camera_location = camera->get_owner()->get_location();
+        transparent.sort(TransparentSorter(camera_location));
     }
 
     auto* context = Device::get()->get_context();
