@@ -177,7 +177,7 @@ class RendererApp : public BaseApp
         ZoneScoped;
 
         const auto* camera_component = camera->get_component<CameraComponent>();
-        renderer->render(world.get(), camera_component);
+        renderer->render(world.get(), camera_component, sun->get_component<DirectionalLightComponent>());
     }
 };
 } // namespace ash

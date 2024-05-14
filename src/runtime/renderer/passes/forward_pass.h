@@ -21,7 +21,10 @@ class ForwardPass
     {
         mat4 proj = mat4(1.0f);
         mat4 view = mat4(1.0f);
-        lvk::SamplerHandle sampler;
+        mat4 light = mat4(1.0f);
+        lvk::SamplerHandle sampler_linear;
+        lvk::SamplerHandle sampler_shadow;
+        lvk::TextureHandle shadow_map;
         ShaderType shader_type = ShaderType::SIMPLE_LIT;
         RenderList& opaque;
         RenderList& transparent;

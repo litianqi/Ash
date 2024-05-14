@@ -18,8 +18,14 @@ class DirectionalLightComponent : public LightComponent
   public:
     glm::vec3 color = {1.0f, 1.0f, 1.0f};
     float intensity = 1.0f;
-    
+    float shadow_near = 1.0f;
+    float shadow_far = 7.5f;
+
     GpuLight get_gpu_light() const override;
+
+    mat4 get_shadow_view_matrix() const;
+
+    mat4 get_shadow_projection_matrix() const;
 };
 
 class PointLightComponent : public LightComponent

@@ -3,8 +3,11 @@
 layout (std430, buffer_reference) readonly buffer PerFrame {
     mat4 proj;
     mat4 view;
-    uint sampler0;
-    uint padding[3];
+    mat4 light;
+    uint sampler_linear;
+    uint sampler_shadow;
+    uint shadow_map;
+    uint padding;
     vec3 ambient_light;
     uint lights_num;
     Light lights[MAX_LIGHT_COUNT];

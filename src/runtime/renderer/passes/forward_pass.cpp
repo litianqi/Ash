@@ -127,7 +127,10 @@ void ForwardPass::render(const RenderPassContext& context, const PassData& data)
     GlobalUniforms global_uniforms_data = {
         .proj = data.proj,
         .view = data.view,
-        .sampler = data.sampler.index(),
+        .light = data.light,
+        .sampler_linear = data.sampler_linear.index(),
+        .sampler_shadow = data.sampler_shadow.index(),
+        .shadow_map = data.shadow_map.index(),
         .ambient_light = data.ambient_light,
         .lights_num = std::min((uint32_t)data.lights.size(), MAX_LIGHT_COUNT),
     };
@@ -150,8 +153,6 @@ void ForwardPass::render(const RenderPassContext& context, const PassData& data)
             context.cmd.cmdBindRenderPipeline(simple_lit_opaque_pipeline);
             break;
         }
-        context.cmd.cmdBindViewport(context.get_viewport());
-        context.cmd.cmdBindScissorRect(context.get_scissor());
         context.cmd.cmdPushDebugGroupLabel("Render Opaque", 0xff0000ff);
         lvk::DepthState depth_state = {.compareOp = lvk::CompareOp_Less, .isDepthWriteEnabled = true};
         context.cmd.cmdBindDepthState(depth_state);
@@ -206,8 +207,6 @@ void ForwardPass::render(const RenderPassContext& context, const PassData& data)
             context.cmd.cmdBindRenderPipeline(simple_lit_transparent_pipeline);
             break;
         }
-        context.cmd.cmdBindViewport(context.get_viewport());
-        context.cmd.cmdBindScissorRect(context.get_scissor());
         context.cmd.cmdPushDebugGroupLabel("Render Transparent", 0xff0000ff);
         lvk::DepthState depth_state = {.compareOp = lvk::CompareOp_Less, .isDepthWriteEnabled = false};
         context.cmd.cmdBindDepthState(depth_state);

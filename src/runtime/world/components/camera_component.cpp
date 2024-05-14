@@ -5,7 +5,7 @@ namespace ash
 mat4 CameraComponent::get_view_matrix() const
 {
     assert(owner);
-    return glm::inverse(owner->get_local_matrix());
+    return glm::inverse(owner->get_matrix());
 }
 
 void CameraComponent::set_eye_at_up(vec3 eye, vec3 at, vec3 up)

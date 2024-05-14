@@ -304,15 +304,10 @@ class GltfApp : public BaseApp
         // Command buffers (1-N per thread): create, submit and forget
         lvk::ICommandBuffer& buffer = context->acquireCommandBuffer();
 
-        const lvk::Viewport viewport = {0.0f, 0.0f, (float)display_width, (float)display_height, 0.0f, +1.0f};
-        const lvk::ScissorRect scissor = {0, 0, (uint32_t)display_width, (uint32_t)display_height};
-
         // This will clear the framebuffer
         buffer.cmdBeginRendering(render_pass, framebuffer);
         {
             buffer.cmdBindRenderPipeline(render_pipeline);
-            buffer.cmdBindViewport(viewport);
-            buffer.cmdBindScissorRect(scissor);
             buffer.cmdPushDebugGroupLabel("Render Mesh", 0xff0000ff);
             buffer.cmdBindDepthState(depth_state);
             // Draw cubes: we use uniform buffer to update matrices

@@ -10,17 +10,6 @@ struct RenderPassContext
 {
     lvk::ICommandBuffer& cmd;
     BufferRing& temp_buffer;
-    uint32_t width = 0;
-    uint32_t height = 0;
-
-    lvk::Viewport get_viewport() const
-    {
-        return lvk::Viewport{0.0f, 0.0f, (float)width, (float)height, 0.0f, +1.0f};
-    }
-    lvk::ScissorRect get_scissor() const
-    {
-        return lvk::ScissorRect{0, 0, width, height};
-    }
 };
 
 struct alignas(16) GpuLight
@@ -42,8 +31,11 @@ struct alignas(16) GlobalUniforms
 {
     mat4 proj;
     mat4 view;
-    uint32_t sampler;
-    uint32_t padding[3];
+    mat4 light;
+    uint32_t sampler_linear;
+    uint32_t sampler_shadow;
+    uint32_t shadow_map;
+    uint32_t padding;
     vec3 ambient_light;
     uint32_t lights_num;
     ash::GpuLight lights[MAX_LIGHT_COUNT];

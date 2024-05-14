@@ -17,6 +17,17 @@ GpuLight DirectionalLightComponent::get_gpu_light() const
     };
 }
 
+mat4 DirectionalLightComponent::get_shadow_view_matrix() const
+{
+    assert(owner);
+    return glm::inverse(owner->get_matrix());
+}
+
+mat4 DirectionalLightComponent::get_shadow_projection_matrix() const
+{
+    return glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, shadow_near, shadow_far);  
+}
+
 GpuLight PointLightComponent::get_gpu_light() const
 {
     return GpuLight{

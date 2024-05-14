@@ -11,9 +11,10 @@ namespace ash
 ForwardRenderer::ForwardRenderer(Device& device, const RendererDesc& desc) : Renderer(device, desc)
 {
     forward_pass = std::make_unique<ForwardPass>(*device.get_context());
+    shadow_pass = std::make_unique<ShadowPass>(*device.get_context());
 }
 
-void ForwardRenderer::render(const World* world, const CameraComponent* camera)
+void ForwardRenderer::render(const World* world, const CameraComponent* camera, const DirectionalLightComponent* main_light)
 {
     ZoneScoped;
 
@@ -65,46 +66,78 @@ void ForwardRenderer::render(const World* world, const CameraComponent* camera)
     }
 
     auto* context = Device::get()->get_context();
-
     lvk::TextureHandle swapchain_texture = context->getCurrentSwapchainTexture();
-    lvk::Framebuffer framebuffer = {.color = {{.texture = swapchain_texture}},
-                                    .depthStencil = {.texture = depth_buffer}};
 
-    // Command buffers (1-N per thread): create, submit and forget
-    lvk::ICommandBuffer& cmd = context->acquireCommandBuffer();
-
-    // This will clear the framebuffer
-    lvk::RenderPass render_pass = {
-        .color = {{
-            .loadOp = lvk::LoadOp_Clear,
-            .storeOp = lvk::StoreOp_Store,
-            .clearColor = {0.0f, 0.0f, 0.0f, 1.0f},
-        }},
-        .depth = {.loadOp = lvk::LoadOp_Clear, .storeOp = lvk::StoreOp_Store, .clearDepth = 1.0}};
-    cmd.cmdBeginRendering(render_pass, framebuffer);
+    //> Shadow Pass
     {
+        lvk::ICommandBuffer& cmd = context->acquireCommandBuffer();
         auto pass_context = RenderPassContext{
             .cmd = cmd,
             .temp_buffer = *temp_buffer,
-            .width = width,
-            .height = height,
         };
-        auto pass_data = ForwardPass::PassData{
-            .proj = camera->get_projection_matrix(),
-            .view = camera->get_view_matrix(),
-            .sampler = sampler,
-            .shader_type = shader_type,
-            .opaque = opaque,
-            .transparent = transparent,
-            .lights = lights,
+        lvk::RenderPass render_pass = {
+            .color = {},
+            .depth = {.loadOp = lvk::LoadOp_Clear, .storeOp = lvk::StoreOp_Store, .clearDepth = 1.0f},
         };
-        forward_pass->render(pass_context, pass_data);
-        auto* imgui = Device::get()->get_imgui();
-        imgui->end_frame(cmd, framebuffer);
+        lvk::Framebuffer framebuffer = {
+            .depthStencil = {.texture = shadow_map},
+        };
+        cmd.cmdBeginRendering(render_pass, framebuffer);
+        {
+            const mat4 light_view = main_light->get_shadow_view_matrix();
+            const mat4 light_proj = main_light->get_shadow_projection_matrix();
+            auto pass_data = ShadowPass::PassData{
+                .light = light_proj * light_view,
+                .opaque = opaque,
+                .transparent = transparent,
+            };
+            shadow_pass->render(pass_context, pass_data);
+        }
+        cmd.cmdEndRendering();
+        cmd.transitionToShaderReadOnly(shadow_map);
+        context->submit(cmd);
+//        context->generateMipmap(shadow_map);
     }
-    cmd.cmdEndRendering();
 
-    context->submit(cmd, swapchain_texture);
+    //> Mesh Pass
+    {
+        lvk::ICommandBuffer& cmd = context->acquireCommandBuffer();
+        auto pass_context = RenderPassContext{
+            .cmd = cmd,
+            .temp_buffer = *temp_buffer,
+        };
+        // This will clear the framebuffer
+        lvk::RenderPass render_pass = {
+            .color = {{
+                .loadOp = lvk::LoadOp_Clear,
+                .storeOp = lvk::StoreOp_Store,
+                .clearColor = {0.0f, 0.0f, 0.0f, 1.0f},
+            }},
+            .depth = {.loadOp = lvk::LoadOp_Clear, .storeOp = lvk::StoreOp_Store, .clearDepth = 1.0}};
+        lvk::Framebuffer framebuffer = {.color = {{.texture = swapchain_texture}},
+                                        .depthStencil = {.texture = depth_buffer}};
+        cmd.cmdBeginRendering(render_pass, framebuffer);
+        {
+            const mat4 light_view = main_light->get_shadow_view_matrix();
+            const mat4 light_proj = main_light->get_shadow_projection_matrix();
+            auto pass_data = ForwardPass::PassData{
+                .proj = camera->get_projection_matrix(),
+                .view = camera->get_view_matrix(),
+                .light = light_proj * light_view,
+                .sampler_linear = sampler_linear,
+                .sampler_shadow = sampler_shadow,
+                .shadow_map = shadow_map,
+                .shader_type = shader_type,
+                .opaque = opaque,
+                .transparent = transparent,
+                .lights = lights,
+            };
+            forward_pass->render(pass_context, pass_data);
+            Device::get()->get_imgui()->end_frame(cmd, framebuffer);
+        }
+        cmd.cmdEndRendering();
+        context->submit(cmd, swapchain_texture);
+    }
 }
 
 } // namespace ash

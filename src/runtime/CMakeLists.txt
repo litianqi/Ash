@@ -47,6 +47,8 @@ add_library(Ash
         world/game_object.h
         world/world.cpp
         world/world.h
+        renderer/passes/shadow_pass.cpp
+        renderer/passes/shadow_pass.h
 )
 
 target_compile_definitions(Ash PUBLIC NOGDI) # disable wingdi.h
